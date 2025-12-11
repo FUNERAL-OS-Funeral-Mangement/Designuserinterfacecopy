@@ -9,6 +9,7 @@ import { Appointments } from './components/Appointments';
 import { WeeklySchedule } from './components/WeeklySchedule';
 import { CatalogLink } from './components/CatalogLink';
 import { FamilyCatalogView } from './components/FamilyCatalogView';
+import { authHelpers } from './lib/supabase';
 
 export type ViewType = 'landing' | 'login' | 'dashboard' | 'first-call' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog';
 
@@ -16,6 +17,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCase, setSelectedCase] = useState<any>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Check if URL is a family catalog link
   useEffect(() => {
@@ -25,14 +27,53 @@ export default function App() {
     }
   }, []);
 
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { session } = await authHelpers.getSession();
+        if (session) {
+          setIsLoggedIn(true);
+          setCurrentView('dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = authHelpers.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsLoggedIn(true);
+        setCurrentView('dashboard');
+      } else if (event === 'SIGNED_OUT') {
+        setIsLoggedIn(false);
+        setCurrentView('landing');
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   const handleLogin = () => {
     setIsLoggedIn(true);
     setCurrentView('dashboard');
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentView('landing');
+  const handleLogout = async () => {
+    try {
+      await authHelpers.signOut();
+      setIsLoggedIn(false);
+      setCurrentView('landing');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const handleCaseClick = (caseData: any) => {
