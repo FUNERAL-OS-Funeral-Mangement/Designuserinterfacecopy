@@ -35,6 +35,17 @@ export function FirstCallDetails({ onBack, onCreateCase }: FirstCallDetailsProps
   const [weight, setWeight] = useState('');
   const [readyTime, setReadyTime] = useState('');
   const [notifyRemovalTeam, setNotifyRemovalTeam] = useState(false);
+  const [readyForPickup, setReadyForPickup] = useState<'yes' | 'no' | ''>('');
+  const [selectedRemovalTeam, setSelectedRemovalTeam] = useState('');
+
+  // Mock removal teams data
+  const removalTeams = [
+    { id: 'team-1', name: 'North Team (John & Mike)' },
+    { id: 'team-2', name: 'South Team (Sarah & David)' },
+    { id: 'team-3', name: 'East Team (Carlos & Lisa)' },
+    { id: 'team-4', name: 'West Team (Emma & James)' },
+    { id: 'team-5', name: 'Night Shift Team (Tom & Rachel)' },
+  ];
 
   const handleSubmit = () => {
     const formattedData = {
@@ -243,19 +254,56 @@ export function FirstCallDetails({ onBack, onCreateCase }: FirstCallDetailsProps
         {/* Step 3: Body Removal */}
         {currentStep === 3 && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-700 mb-2">Weight (lbs)</label>
-                <input
-                  type="number"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="180"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400 transition-colors"
-                />
+            <div>
+              <label className="block text-gray-700 mb-2">Weight (lbs)</label>
+              <input
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="180"
+                className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-2">Ready for pickup</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReadyForPickup('yes');
+                    if (readyForPickup !== 'yes') {
+                      setReadyTime('');
+                    }
+                  }}
+                  className={`flex-1 px-4 py-3 border transition-colors ${
+                    readyForPickup === 'yes'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReadyForPickup('no');
+                    setReadyTime('');
+                  }}
+                  className={`flex-1 px-4 py-3 border transition-colors ${
+                    readyForPickup === 'no'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  No
+                </button>
               </div>
+            </div>
+
+            {readyForPickup === 'yes' && (
               <div>
-                <label className="block text-gray-700 mb-2">Ready for pickup</label>
+                <label className="block text-gray-700 mb-2">Pickup time</label>
                 <input
                   type="text"
                   value={readyTime}
@@ -264,7 +312,7 @@ export function FirstCallDetails({ onBack, onCreateCase }: FirstCallDetailsProps
                   className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400 transition-colors"
                 />
               </div>
-            </div>
+            )}
 
             <div className="pt-6 border-t border-gray-200">
               <label className="flex items-start gap-3 cursor-pointer group">
@@ -282,6 +330,24 @@ export function FirstCallDetails({ onBack, onCreateCase }: FirstCallDetailsProps
                 </div>
               </label>
             </div>
+
+            {notifyRemovalTeam && (
+              <div className="mt-4">
+                <label className="block text-gray-700 mb-2">Select removal team</label>
+                <select
+                  value={selectedRemovalTeam}
+                  onChange={(e) => setSelectedRemovalTeam(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400 transition-colors"
+                >
+                  <option value="">Select a team</option>
+                  {removalTeams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
 

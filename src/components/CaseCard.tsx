@@ -1,4 +1,4 @@
-import { MapPin, User, Upload, CheckCircle2, Circle } from 'lucide-react';
+import { MapPin, User, Upload, CheckCircle2, Circle, Calendar } from 'lucide-react';
 import { useState } from 'react';
 
 interface CaseCardProps {
@@ -15,7 +15,10 @@ interface CaseCardProps {
   totalTasks: number;
   price: number;
   assignedTo: string;
+  serviceDate?: string;
+  caseId?: string;
   onPhotoUpload?: (caseNumber: string | number, file: File) => void;
+  onServiceDateChange?: (caseId: string, serviceDate: string) => void;
 }
 
 export function CaseCard({
@@ -32,10 +35,15 @@ export function CaseCard({
   totalTasks,
   price,
   assignedTo,
+  serviceDate,
+  caseId,
   onPhotoUpload,
+  onServiceDateChange,
 }: CaseCardProps) {
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(photoUrl || null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isEditingServiceDate, setIsEditingServiceDate] = useState(false);
+  const [tempServiceDate, setTempServiceDate] = useState(serviceDate || '');
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,6 +58,32 @@ export function CaseCard({
       if (onPhotoUpload) {
         onPhotoUpload(caseNumber, file);
       }
+    }
+  };
+
+  const handleServiceDateClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingServiceDate(true);
+  };
+
+  const handleServiceDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    setTempServiceDate(e.target.value);
+  };
+
+  const handleServiceDateBlur = () => {
+    setIsEditingServiceDate(false);
+    if (caseId && onServiceDateChange && tempServiceDate) {
+      onServiceDateChange(caseId, tempServiceDate);
+    }
+  };
+
+  const handleServiceDateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleServiceDateBlur();
+    } else if (e.key === 'Escape') {
+      setIsEditingServiceDate(false);
+      setTempServiceDate(serviceDate || '');
     }
   };
 
@@ -163,6 +197,40 @@ export function CaseCard({
             ></div>
           </div>
         </div>
+      </div>
+
+      {/* Service Date - Highlighted */}
+      <div className="px-6 py-4 bg-blue-600/20 border-y border-blue-500/30">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-blue-400" />
+          <span className="text-xs text-blue-300">Service Date</span>
+        </div>
+        {isEditingServiceDate ? (
+          <input
+            type="date"
+            value={tempServiceDate}
+            onChange={handleServiceDateChange}
+            onBlur={handleServiceDateBlur}
+            onKeyDown={handleServiceDateKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-2 w-full bg-gray-800 border border-blue-500 text-blue-100 px-3 py-2 rounded focus:outline-none focus:border-blue-400 transition-colors"
+            autoFocus
+          />
+        ) : (
+          <div
+            onClick={handleServiceDateClick}
+            className="mt-2 text-blue-100 hover:text-white transition-colors cursor-pointer group/date"
+          >
+            {tempServiceDate ? (
+              <span className="flex items-center gap-2">
+                <span>{new Date(tempServiceDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <span className="text-xs text-blue-400 opacity-0 group-hover/date:opacity-100 transition-opacity">Click to edit</span>
+              </span>
+            ) : (
+              <span className="text-sm text-blue-300 hover:text-blue-100">Click to set service date</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Price */}

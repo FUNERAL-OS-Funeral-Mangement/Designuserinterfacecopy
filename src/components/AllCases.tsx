@@ -13,9 +13,16 @@ interface AllCasesProps {
 export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'At-Need' | 'Pre-Need'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'service-date'>('newest');
 
-  // Sample case data
-  const cases = [
+  // Get cases from store
+  const getAllCases = useCaseStore((state) => state.getAllCases);
+  const updateServiceDate = useCaseStore((state) => state.updateServiceDate);
+  const storeCases = getAllCases();
+
+  // Sample case data (demo data)
+  const demoCases = [
     {
       caseId: 'case-001',
       caseNumber: 'RTP-202306-0001',
@@ -269,9 +276,9 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
       initializeCase({
         id: `case-00${num}`,
         caseNumber: `00${num}`,
-        deceasedName: cases[num - 1].deceasedName,
-        caseType: cases[num - 1].caseType,
-        dateCreated: cases[num - 1].dateCreated,
+        deceasedName: demoCases[num - 1].deceasedName,
+        caseType: demoCases[num - 1].caseType,
+        dateCreated: demoCases[num - 1].dateCreated,
         catalogSelections: {
           addons: [],
           memorials: [],
@@ -280,10 +287,62 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
     });
   }, []);
 
-  // Filter cases based on search query
-  const filteredCases = cases.filter((caseItem) =>
-    caseItem.deceasedName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Merge demo cases with store cases
+  const allCases = [
+    ...demoCases,
+    ...storeCases
+      .filter(storeCase => !demoCases.some(demoCase => demoCase.caseId === storeCase.id))
+      .map(storeCase => ({
+        caseId: storeCase.id,
+        caseNumber: storeCase.caseNumber,
+        dateCreated: storeCase.dateCreated,
+        deceasedName: storeCase.deceasedName,
+        caseType: storeCase.caseType as 'At-Need' | 'Pre-Need',
+        serviceType: 'First Call', // Default service type for First Call cases
+        location: undefined,
+        photoUrl: storeCase.photoUrl,
+        serviceDate: storeCase.serviceDate,
+        stepsCompleted: 0,
+        totalSteps: 5,
+        tasksCompleted: 0,
+        totalTasks: 0,
+        price: 0,
+        assignedTo: 'Unassigned',
+      }))
+  ];
+
+  // Parse date for sorting
+  const parseDate = (dateStr: string) => {
+    return new Date(dateStr).getTime();
+  };
+
+  // Filter and sort cases
+  let filteredCases = allCases
+    .filter((caseItem) => {
+      // Search filter
+      const matchesSearch = caseItem.deceasedName.toLowerCase().includes(searchQuery.toLowerCase());
+      // Type filter
+      const matchesType = filterType === 'all' || caseItem.caseType === filterType;
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'newest') {
+        return parseDate(b.dateCreated) - parseDate(a.dateCreated);
+      } else if (sortBy === 'oldest') {
+        return parseDate(a.dateCreated) - parseDate(b.dateCreated);
+      } else if (sortBy === 'service-date') {
+        // Sort by service date (cases without service date go to bottom)
+        if (!a.serviceDate && !b.serviceDate) return 0;
+        if (!a.serviceDate) return 1;
+        if (!b.serviceDate) return -1;
+        return parseDate(a.serviceDate) - parseDate(b.serviceDate);
+      }
+      return 0;
+    });
+
+  const handleServiceDateChange = (caseId: string, serviceDate: string) => {
+    updateServiceDate(caseId, serviceDate);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -302,7 +361,7 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
           <div className="hidden lg:flex lg:items-center lg:gap-6 mb-8">
             <div className="flex-shrink-0">
               <h1 className="text-gray-900 mb-1">Cases</h1>
-              <p className="text-gray-600">{cases.length} active cases</p>
+              <p className="text-gray-600">{allCases.length} active cases</p>
             </div>
             
             <div className="flex-1 max-w-md">
@@ -340,7 +399,7 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
               <div>
                 <h1 className="text-gray-900 mb-1">Cases</h1>
-                <p className="text-gray-600">{cases.length} active cases</p>
+                <p className="text-gray-600">{allCases.length} active cases</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -375,11 +434,67 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
         </div>
       </div>
 
+      {/* Filter and Sort Bar */}
+      <div className="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          {/* Filter by Type */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Filter:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterType('all')}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  filterType === 'all'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilterType('At-Need')}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  filterType === 'At-Need'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                }`}
+              >
+                At-Need
+              </button>
+              <button
+                onClick={() => setFilterType('Pre-Need')}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  filterType === 'Pre-Need'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                }`}
+              >
+                Pre-Need
+              </button>
+            </div>
+          </div>
+
+          {/* Sort By */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Sort by:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'service-date')}
+              className="px-3 py-1.5 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:border-gray-400 transition-colors"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="service-date">Service Date</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Cases Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8 py-8">
         {filteredCases.map((caseItem) => (
           <div key={caseItem.caseId} onClick={() => onCaseClick(caseItem)} className="cursor-pointer">
-            <CaseCard {...caseItem} />
+            <CaseCard {...caseItem} onServiceDateChange={handleServiceDateChange} />
           </div>
         ))}
       </div>
@@ -388,7 +503,7 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
       <CasesReportModal 
         show={showReportModal} 
         onClose={() => setShowReportModal(false)} 
-        cases={cases}
+        cases={storeCases}
       />
     </div>
   );

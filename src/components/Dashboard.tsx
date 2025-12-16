@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import emmanuelLogo from "figma:asset/995e9f13c0bef55b3c91329b2a17a777ef793705.png";
+import eduardoLogo from "figma:asset/4f4413d53848e948d0d7a0a9be4a11765dd0c149.png";
+import ritePathLogo from "figma:asset/004a81e9bfe8a591307cff80ff24ed76f8e8a0e0.png";
 import {
   FolderOpen,
   FileText,
@@ -12,6 +13,11 @@ import {
   Search,
   HelpCircle,
   TrendingUp,
+  ArrowLeft,
+  User,
+  BookOpen,
+  ShoppingBag,
+  Archive,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -134,68 +140,133 @@ export function Dashboard({
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Sidebar - Logo & Quick Actions */}
       <aside className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 bg-white border-r border-gray-200 flex-shrink-0">
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-8">
-            {/* Funeral Home Logo / Profile */}
-            <div className="text-center mb-8">
-              <div className="w-48 h-48 mx-auto mb-4 flex items-center justify-center bg-white p-4">
-                <img
-                  src={emmanuelLogo}
-                  alt="Emmanuel Funeral Services"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <h2 className="text-gray-900 mb-1">
-                Emmanuel Funeral Services
-              </h2>
-              <p className="text-sm text-gray-500">
-                Serving families with dignity
-              </p>
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Logo Section - Clean & Minimal */}
+          <div className="flex-shrink-0 p-6 text-center border-b border-gray-200">
+            {/* Back to Home Button - Top Left */}
+            <button
+              onClick={() => window.location.href = '/'}
+              className="absolute top-6 left-6 flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+            
+            <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 border border-gray-300 p-4">
+              <img
+                src={eduardoLogo}
+                alt="Eduardo Rivero"
+                className="w-full h-full object-contain"
+              />
             </div>
+            <h2 className="text-gray-900 mb-5 text-base">
+              Eduardo Rivero Funeral HOme
+            </h2>
+            <p className="text-sm text-gray-500">
+              Serving families with dignity
+            </p>
+          </div>
 
-            {/* Quick Actions */}
-            <div>
-              <h3 className="text-gray-900 mb-4 text-sm uppercase tracking-wide">
-                Start Here
-              </h3>
-              <div className="space-y-3">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => onNavigate(action.view)}
-                    className="w-full bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-gray-300 hover:shadow-sm transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-lg ${action.iconBg} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
-                      >
-                        <action.icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-gray-900 text-sm mb-0.5">
-                          {action.label}
-                        </h4>
-                        <p className="text-xs text-gray-500">
-                          {action.description}
-                        </p>
-                      </div>
+          {/* Quick Actions */}
+          <div className="flex-1 px-6 py-6">
+            <h3 className="text-gray-900 mb-4 text-xs uppercase tracking-wider">
+              Start Here
+            </h3>
+            <div className="space-y-2.5">
+              {quickActions.map((action, index) => (
+                <button
+                  key={index}
+                  onClick={() => onNavigate(action.view)}
+                  className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-9 h-9 rounded-lg ${action.iconBg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200`}
+                    >
+                      <action.icon className="w-4.5 h-4.5 text-white" />
                     </div>
-                  </button>
-                ))}
-              </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
+                        {action.label}
+                      </h4>
+                      <p className="text-xs text-gray-500 leading-tight">
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+              
+              {/* My Products Button */}
+              <button
+                onClick={() => onNavigate('catalogs')}
+                className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                    <BookOpen className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
+                      My Catalogs
+                    </h4>
+                    <p className="text-xs text-gray-500 leading-tight">
+                      Manage product catalogs
+                    </p>
+                  </div>
+                </div>
+              </button>
+              
+              {/* Staff and Vendors Button */}
+              <button
+                onClick={() => alert('Staff and Vendors coming soon!')}
+                className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-amber-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                    <ShoppingBag className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
+                      Staff and Vendors
+                    </h4>
+                    <p className="text-xs text-gray-500 leading-tight">
+                      Manage inventory & suppliers
+                    </p>
+                  </div>
+                </div>
+              </button>
+                   
+              {/* Document Library */}
+              <button
+                onClick={() => onNavigate('document-library')}
+                className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                    <Archive className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
+                      Document Library 
+                    </h4>
+                    <p className="text-xs text-gray-500 leading-tight">
+                      Manage All types of Documents 
+                    </p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-6 border-t border-gray-200">
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors rounded-lg text-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign out</span>
-          </button>
+        <div className="flex-shrink-0 pt-4 p-8 border-t border-gray-200 flex items-center justify-center">
+          <img
+            src={ritePathLogo}
+            alt="RitePath"
+            className="h-12 object-contain"
+          />
         </div>
       </aside>
 
@@ -245,7 +316,17 @@ export function Dashboard({
                 </button>
                 <button
                   onClick={onLogout}
-                  className="lg:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                  className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden lg:inline">
+                    Sign out
+                  </span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="sm:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>

@@ -9,6 +9,7 @@ import { ReportsTab } from './case-tabs/ReportsTab';
 import { OrdersTab } from './case-tabs/OrdersTab';
 import { MissingItemsTab } from './case-tabs/MissingItemsTab';
 import { PrepRoomTab } from './case-tabs/PrepRoomTab';
+import { StaffCatalogView } from './StaffCatalogView';
 import { useCaseStore } from '../store/useCaseStore';
 
 interface CaseDetailPageProps {

@@ -9,50 +9,54 @@ import { Appointments } from './components/Appointments';
 import { WeeklySchedule } from './components/WeeklySchedule';
 import { CatalogLink } from './components/CatalogLink';
 import { FamilyCatalogView } from './components/FamilyCatalogView';
+import { Catalogs } from './components/Catalogs';
+import { DocumentLibrary } from './components/DocumentLibrary';
 import { authHelpers } from './lib/supabase';
 
-export type ViewType = 'landing' | 'login' | 'dashboard' | 'first-call' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog';
+export type ViewType = 'landing' | 'login' | 'dashboard' | 'first-call' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog' | 'catalogs' | 'document-library';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCase, setSelectedCase] = useState<any>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
-  // Check if URL is a family catalog link
+  // Check URL parameters on mount
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const view = urlParams.get('view');
     const path = window.location.pathname;
+    
+    // Family catalog route
     if (path.startsWith('/family-catalog/')) {
       setCurrentView('family-catalog');
+      return;
     }
-  }, []);
-
-  // Check for existing session on mount
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { session } = await authHelpers.getSession();
+    
+    // View parameter
+    if (view === 'login') {
+      setCurrentView('login');
+      return;
+    }
+    
+    if (view === 'dashboard') {
+      // Check if user has a session
+      authHelpers.getSession().then(({ session }) => {
         if (session) {
           setIsLoggedIn(true);
           setCurrentView('dashboard');
         }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
+      });
+    }
+  }, []);
 
-    checkSession();
-
-    // Listen for auth state changes
+  // Listen for auth state changes
+  useEffect(() => {
     const { data: { subscription } } = authHelpers.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setIsLoggedIn(true);
-        setCurrentView('dashboard');
       } else if (event === 'SIGNED_OUT') {
         setIsLoggedIn(false);
-        setCurrentView('landing');
       }
     });
 
@@ -81,53 +85,71 @@ export default function App() {
     setCurrentView('case-detail');
   };
 
-  const renderView = () => {
-    // Family catalog is public - no login required
-    if (currentView === 'family-catalog') {
-      return <FamilyCatalogView />;
-    }
+  // Show loading screen while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    );
+  }
 
-    if (!isLoggedIn && currentView !== 'landing' && currentView !== 'login') {
+  // Family catalog is public - no login required
+  if (currentView === 'family-catalog') {
+    return <FamilyCatalogView />;
+  }
+
+  // Redirect to landing if not logged in (except for landing and login pages)
+  if (!isLoggedIn && currentView !== 'landing' && currentView !== 'login') {
+    return <LandingPage onNavigate={setCurrentView} />;
+  }
+
+  // Render the current view
+  switch (currentView) {
+    case 'landing':
       return <LandingPage onNavigate={setCurrentView} />;
-    }
-
-    switch (currentView) {
-      case 'landing':
-        return <LandingPage onNavigate={setCurrentView} />;
-      case 'login':
-        return <LoginPage onLogin={handleLogin} onBack={() => setCurrentView('landing')} />;
-      case 'dashboard':
-        return <Dashboard onNavigate={setCurrentView} onLogout={handleLogout} />;
-      case 'first-call':
-        return <FirstCall onBack={() => setCurrentView('dashboard')} onNavigateToCases={() => setCurrentView('cases')} />;
-      case 'cases':
-        return <Cases onBack={() => setCurrentView('dashboard')} onCaseClick={handleCaseClick} />;
-      case 'case-detail':
-        return selectedCase ? (
-          <CaseDetailPage 
-            caseId={selectedCase.caseId || `case-${selectedCase.caseNumber}`}
-            caseNumber={selectedCase.caseNumber}
-            deceasedName={selectedCase.deceasedName}
-            caseType={selectedCase.caseType}
-            dateCreated={selectedCase.dateCreated}
-            photoUrl={selectedCase.photoUrl}
-            onBack={() => setCurrentView('cases')}
-          />
-        ) : null;
-      case 'appointments':
-        return <Appointments onBack={() => setCurrentView('dashboard')} />;
-      case 'schedule':
-        return <WeeklySchedule onBack={() => setCurrentView('dashboard')} />;
-      case 'catalog-link':
-        return <CatalogLink onBack={() => setCurrentView('dashboard')} />;
-      default:
-        return <LandingPage onNavigate={setCurrentView} />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {renderView()}
-    </div>
-  );
+    
+    case 'login':
+      return <LoginPage onLogin={handleLogin} onBack={() => setCurrentView('landing')} />;
+    
+    case 'dashboard':
+      return <Dashboard onNavigate={setCurrentView} onLogout={handleLogout} />;
+    
+    case 'first-call':
+      return <FirstCall onBack={() => setCurrentView('dashboard')} onNavigateToCases={() => setCurrentView('cases')} />;
+    
+    case 'cases':
+      return <Cases onBack={() => setCurrentView('dashboard')} onCaseClick={handleCaseClick} />;
+    
+    case 'case-detail':
+      return selectedCase ? (
+        <CaseDetailPage 
+          caseId={selectedCase.caseId || `case-${selectedCase.caseNumber}`}
+          caseNumber={selectedCase.caseNumber}
+          deceasedName={selectedCase.deceasedName}
+          caseType={selectedCase.caseType}
+          dateCreated={selectedCase.dateCreated}
+          photoUrl={selectedCase.photoUrl}
+          onBack={() => setCurrentView('cases')}
+        />
+      ) : null;
+    
+    case 'appointments':
+      return <Appointments onBack={() => setCurrentView('dashboard')} />;
+    
+    case 'schedule':
+      return <WeeklySchedule onBack={() => setCurrentView('dashboard')} />;
+    
+    case 'catalog-link':
+      return <CatalogLink onBack={() => setCurrentView('dashboard')} />;
+    
+    case 'catalogs':
+      return <Catalogs onBack={() => setCurrentView('dashboard')} />;
+    
+    case 'document-library':
+      return <DocumentLibrary onBack={() => setCurrentView('dashboard')} />;
+    
+    default:
+      return <LandingPage onNavigate={setCurrentView} />;
+  }
 }

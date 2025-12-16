@@ -9,10 +9,33 @@ export function CatalogLink({ onBack }: CatalogLinkProps) {
   const [copied, setCopied] = useState(false);
   const catalogUrl = 'https://legacyservices.com/catalog/family-view';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(catalogUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      // Try modern clipboard API first
+      await navigator.clipboard.writeText(catalogUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = catalogUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        textArea.remove();
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      } catch (fallbackErr) {
+        console.error('Failed to copy:', fallbackErr);
+      }
+    }
   };
 
   return (

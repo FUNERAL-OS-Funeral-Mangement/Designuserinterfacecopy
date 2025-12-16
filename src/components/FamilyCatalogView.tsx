@@ -1,221 +1,11 @@
 import { useState } from 'react';
-import { Package, Plus, Check, ShoppingCart, Send, Heart, Eye, X } from 'lucide-react';
+import { Package, Plus, Check, ShoppingCart, Send, Heart, Eye, X, Info } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useCaseStore } from '../store/useCaseStore';
-
-const packages = [
-  {
-    id: 'pkg-basic',
-    name: 'Basic Service Package',
-    description: 'Essential services for a dignified memorial',
-    price: 2500,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=400',
-    included: [
-      'Basic services of funeral director and staff',
-      'Transfer of remains to funeral home',
-      'Embalming or refrigeration',
-      'Basic memorial service at funeral home',
-      'Use of facilities for viewing (1 day)',
-      'Coordination with cemetery/crematory',
-      'Assistance with death certificates and permits',
-    ],
-  },
-  {
-    id: 'pkg-celebration',
-    name: 'Celebration of Life Package',
-    description: 'Comprehensive celebration with personalized touches',
-    price: 4200,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f29da8c43f?w=400',
-    included: [
-      'All Basic Package services',
-      'Extended facility use (2 days)',
-      'Audio/visual equipment for slideshows',
-      'Memory table setup',
-      'Guest register book',
-      'Memorial folders (100 count)',
-      'Online obituary posting',
-      'Reception coordination (up to 50 guests)',
-    ],
-  },
-  {
-    id: 'pkg-premium',
-    name: 'Premium Memorial Package',
-    description: 'Full-service premium memorial experience',
-    price: 6500,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400',
-    included: [
-      'All Celebration Package services',
-      'Extended facility use (3 days)',
-      'Premium casket or urn selection',
-      'Professional tribute video production',
-      'Customized memorial website (1 year)',
-      'Transportation in luxury vehicle',
-      'Floral arrangement coordination',
-      'Live streaming service',
-      'Memorial DVD copies (10 count)',
-      'Personalized keepsakes for family',
-    ],
-  },
-  {
-    id: 'pkg-cremation',
-    name: 'Direct Cremation Package',
-    description: 'Simple and respectful cremation service',
-    price: 1800,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1518709594023-6eab9bab7b23?w=400',
-    included: [
-      'Basic services of funeral director',
-      'Transfer of remains',
-      'Refrigeration (up to 5 days)',
-      'Crematory fees',
-      'Basic cremation container',
-      'Basic urn',
-      'Assistance with permits and certificates',
-    ],
-  },
-  {
-    id: 'pkg-burial',
-    name: 'Burial Package',
-    description: 'Traditional burial service with full arrangements',
-    price: 5200,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    included: [
-      'All Basic Package services',
-      'Casket selection assistance',
-      'Graveside service coordination',
-      'Hearse and lead car',
-      'Cemetery coordination',
-      'Flower car service',
-      'Burial vault arrangements',
-      'Extended viewing (2 days)',
-      'Memorial folders (150 count)',
-    ],
-  },
-];
-
-const addons = [
-  {
-    id: 'addon-prayer-cards',
-    name: 'Prayer Cards',
-    description: 'Custom printed prayer cards (set of 100)',
-    price: 150,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-    details: 'Beautifully designed prayer cards featuring your loved one\'s photo, name, dates, and a meaningful prayer or verse. Professionally printed on premium cardstock.',
-  },
-  {
-    id: 'addon-program-4pg',
-    name: 'Memorial Program (4-page)',
-    description: 'Professionally designed 4-page memorial program',
-    price: 200,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400',
-    details: 'Elegant 4-page memorial program including order of service, obituary, photo, and acknowledgments. Custom design with your choice of colors and themes.',
-  },
-  {
-    id: 'addon-program-8pg',
-    name: 'Memorial Program (8-page)',
-    description: 'Professionally designed 8-page memorial program',
-    price: 320,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400',
-    details: 'Comprehensive 8-page program with extended photo gallery, life story, favorite memories, and detailed order of service. Multiple layout options available.',
-  },
-  {
-    id: 'addon-program-12pg',
-    name: 'Memorial Program (12-page)',
-    description: 'Professionally designed 12-page memorial program',
-    price: 450,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400',
-    details: 'Premium 12-page keepsake program featuring extensive photo collection, complete life history, family tree, and personalized tributes. Magazine-quality printing.',
-  },
-  {
-    id: 'addon-acknowledgment',
-    name: 'Acknowledgment Cards',
-    description: 'Thank you cards for attendees (set of 50)',
-    price: 120,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1587845750216-a2aa8cb9cd9e?w=400',
-    details: 'Thoughtful thank you cards to send to those who attended the service or sent condolences. Includes matching envelopes and custom message.',
-  },
-  {
-    id: 'addon-photo-enlargement',
-    name: 'Photo Enlargements',
-    description: 'Professional photo enlargement and framing',
-    price: 250,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=400',
-    details: 'Professional enlargement of your chosen photo (up to 20x30"), mounted and framed for display at the service. Available in multiple frame styles.',
-  },
-  {
-    id: 'addon-tribute-video',
-    name: 'Tribute Video / Slideshow',
-    description: 'Professional video tribute with music',
-    price: 400,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400',
-    details: 'Professional video montage with up to 50 photos, custom music selection, transitions, and titles. Includes DVD copies and digital file for family.',
-  },
-  {
-    id: 'addon-dove-release',
-    name: 'Dove Release',
-    description: 'Ceremonial white dove release',
-    price: 350,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1551198509-a025f0a3d3cb?w=400',
-    details: 'Symbolic release of white doves at the conclusion of the service. Includes handler, up to 6 doves, and coordination with ceremony timeline.',
-  },
-  {
-    id: 'addon-limousine',
-    name: 'Limousine',
-    description: 'Professional limousine service for family',
-    price: 450,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1567225591450-0bd5ff4b5e4f?w=400',
-    details: 'Luxury limousine service for immediate family (up to 8 passengers). Includes transportation to and from the service, with professional chauffeur.',
-  },
-  {
-    id: 'addon-floral',
-    name: 'Floral Arrangements',
-    description: 'Custom floral arrangements and wreaths',
-    price: 300,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400',
-    details: 'Custom floral arrangements in your choice of flowers and colors. Includes casket spray or altar arrangement. Coordinated with your florist of choice.',
-  },
-  {
-    id: 'addon-website',
-    name: 'Memorial Website Page',
-    description: 'Dedicated online memorial page (1 year hosting)',
-    price: 180,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400',
-    details: 'Personalized memorial website with photo gallery, guestbook, service information, and donation links. Mobile-friendly design with 1 year of hosting included.',
-  },
-  {
-    id: 'addon-guest-register',
-    name: 'Guest Register Book',
-    description: 'Elegant guest book with custom cover',
-    price: 85,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=400',
-    details: 'Premium guest register book with personalized cover featuring your loved one\'s name and dates. Quality paper and elegant binding for lasting keepsake.',
-  },
-  {
-    id: 'addon-cremation-jewelry',
-    name: 'Cremation Jewelry',
-    description: 'Memorial pendant for cremated remains',
-    price: 220,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
-    details: 'Sterling silver memorial pendant with discreet chamber for a small portion of cremated remains. Includes chain and presentation box. Multiple styles available.',
-  },
-];
+import { useCatalogStore } from '../store/useCatalogStore';
+import { ServiceInformationModal } from './ServiceInformationModal';
+import { IncludedItemModal, includedItemsData } from './IncludedItemModal';
+import type { ServiceInformation } from '../store/useCaseStore';
 
 interface FamilyCatalogViewProps {
   onCreateCase?: (catalogData: any) => void;
@@ -224,6 +14,12 @@ interface FamilyCatalogViewProps {
 
 export function FamilyCatalogView({ onCreateCase, caseId }: FamilyCatalogViewProps = {}) {
   const addCatalogItemToCase = useCaseStore((state) => state.addCatalogItemToCase);
+  const updateServiceInformation = useCaseStore((state) => state.updateServiceInformation);
+  
+  // Get catalog data from store
+  const packages = useCatalogStore((state) => state.packages);
+  const addonsFromStore = useCatalogStore((state) => state.addons);
+  
   const [view, setView] = useState<'packages' | 'addons'>('packages');
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedAddons, setSelectedAddons] = useState<any[]>([]);
@@ -232,11 +28,29 @@ export function FamilyCatalogView({ onCreateCase, caseId }: FamilyCatalogViewPro
   const [showCaseOption, setShowCaseOption] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<any>(null);
   const [viewDetailsItem, setViewDetailsItem] = useState<any>(null);
+  const [serviceInfo, setServiceInfo] = useState<ServiceInformation | null>(null);
+  const [includedItem, setIncludedItem] = useState<string | null>(null);
+  const [pendingPackage, setPendingPackage] = useState<any>(null);
+  const [showServiceModal, setShowServiceModal] = useState(false);
 
-  const currentItems = view === 'packages' ? packages : addons;
+  const currentItems = view === 'packages' ? packages : addonsFromStore;
 
   const handleSelectPackage = (pkg: any) => {
-    setSelectedPackage(pkg);
+    setPendingPackage(pkg);
+    setShowServiceModal(true);
+  };
+
+  const handleServiceInfoSave = (serviceInformation: ServiceInformation) => {
+    if (pendingPackage) {
+      setSelectedPackage(pendingPackage);
+      
+      // If caseId is provided, save service information to the store
+      if (caseId) {
+        updateServiceInformation(caseId, serviceInformation);
+      }
+      
+      setPendingPackage(null);
+    }
   };
 
   const handleToggleAddon = (addon: any) => {
@@ -330,15 +144,45 @@ export function FamilyCatalogView({ onCreateCase, caseId }: FamilyCatalogViewPro
               {viewDetailsItem.category === 'package' && viewDetailsItem.included && (
                 <div className="mb-6">
                   <h3 className="text-gray-900 mb-4">What's Included</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Click any item below to learn more about what it means
+                  </p>
                   <div className="space-y-3">
-                    {viewDetailsItem.included.map((service: string, index: number) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3 h-3 text-teal-600" />
-                        </div>
-                        <p className="text-gray-700 text-sm">{service}</p>
-                      </div>
-                    ))}
+                    {viewDetailsItem.included.map((service: any, index: number) => {
+                      const serviceKey = typeof service === 'object' ? service.key : null;
+                      const serviceLabel = typeof service === 'object' ? service.label : service;
+                      const hasDetails = serviceKey && includedItemsData[serviceKey];
+
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            if (hasDetails) {
+                              setIncludedItem(serviceKey);
+                              setViewDetailsItem(null);
+                            }
+                          }}
+                          disabled={!hasDetails}
+                          className={`w-full flex items-start gap-3 text-left p-3 rounded-lg transition-colors ${
+                            hasDetails
+                              ? 'hover:bg-blue-50 cursor-pointer group'
+                              : 'cursor-default'
+                          }`}
+                        >
+                          <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check className="w-3 h-3 text-teal-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className={`text-gray-700 text-sm ${hasDetails ? 'group-hover:text-gray-900' : ''}`}>
+                              {serviceLabel}
+                            </p>
+                          </div>
+                          {hasDetails && (
+                            <Info className="w-4 h-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -376,6 +220,28 @@ export function FamilyCatalogView({ onCreateCase, caseId }: FamilyCatalogViewPro
             </div>
           </div>
         </div>
+      )}
+
+      {/* Service Information Modal */}
+      {showServiceModal && pendingPackage && (
+        <ServiceInformationModal
+          show={showServiceModal}
+          onClose={() => {
+            setShowServiceModal(false);
+            setPendingPackage(null);
+          }}
+          onSave={handleServiceInfoSave}
+          packageName={pendingPackage.name}
+        />
+      )}
+
+      {/* Included Item Modal */}
+      {includedItem && includedItemsData[includedItem] && (
+        <IncludedItemModal
+          show={true}
+          onClose={() => setIncludedItem(null)}
+          item={includedItemsData[includedItem]}
+        />
       )}
 
       {/* Header */}

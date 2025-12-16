@@ -14,13 +14,31 @@ export interface CatalogItem {
 }
 
 export interface RegulatoryInfo {
-  burialTransitNumber?: string;
-  embalmerName?: string;
-  embalmerLicense?: string;
-  methodOfDisposal?: string;
-  countyOfDeath?: string;
-  directorInCharge?: string;
-  directorLicense?: string;
+  deceasedSSN?: string;
+  placeOfDeath?: string;
+  causeOfDeath?: string;
+  physicianName?: string;
+  physicianPhone?: string;
+  cemeteryName?: string;
+  cemeteryPhone?: string;
+  dateOfBirth?: string;
+  dateOfDeath?: string;
+}
+
+export interface ServiceInformation {
+  date?: string;
+  time?: string;
+  location?: string;
+  address?: string;
+  notes?: string;
+}
+
+export interface VisitationInformation {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  location?: string;
+  address?: string;
 }
 
 export interface CaseData {
@@ -30,6 +48,9 @@ export interface CaseData {
   caseType: string;
   dateCreated: string;
   photoUrl?: string;
+  serviceDate?: string;
+  serviceInformation?: ServiceInformation;
+  visitationInformation?: VisitationInformation;
   catalogSelections: {
     package?: CatalogItem;
     addons: CatalogItem[];
@@ -48,9 +69,14 @@ interface CaseStore {
   updateCasePhoto: (caseId: string, photoUrl: string) => void;
   updateCaseNumber: (caseId: string, newCaseNumber: string) => void;
   updateRegulatoryInfo: (caseId: string, regulatoryInfo: RegulatoryInfo) => void;
+  updateServiceDate: (caseId: string, serviceDate: string) => void;
+  updateServiceInformation: (caseId: string, serviceInformation: ServiceInformation) => void;
+  updateVisitationInformation: (caseId: string, visitationInformation: VisitationInformation) => void;
   getCatalogItems: (caseId: string) => { package?: CatalogItem; addons: CatalogItem[]; memorials: CatalogItem[] } | undefined;
   initializeCase: (caseData: CaseData) => void;
   generateCaseNumber: () => string;
+  addCase: (caseData: Omit<CaseData, 'id' | 'caseNumber'>) => CaseData;
+  getAllCases: () => CaseData[];
 }
 
 export const useCaseStore = create<CaseStore>((set, get) => ({
@@ -144,6 +170,52 @@ export const useCaseStore = create<CaseStore>((set, get) => ({
     });
   },
 
+  updateServiceDate: (caseId, serviceDate) => {
+    set((state) => {
+      const newCases = new Map(state.cases);
+      const caseData = newCases.get(caseId);
+      
+      if (!caseData) return state;
+
+      newCases.set(caseId, { ...caseData, serviceDate });
+      return { cases: newCases };
+    });
+  },
+
+  updateServiceInformation: (caseId, serviceInformation) => {
+    set((state) => {
+      const newCases = new Map(state.cases);
+      const caseData = newCases.get(caseId);
+      
+      if (!caseData) return state;
+
+      // Also update serviceDate if date is provided in serviceInformation
+      const updatedCase = { 
+        ...caseData, 
+        serviceInformation: { ...caseData.serviceInformation, ...serviceInformation }
+      };
+      
+      if (serviceInformation.date) {
+        updatedCase.serviceDate = serviceInformation.date;
+      }
+
+      newCases.set(caseId, updatedCase);
+      return { cases: newCases };
+    });
+  },
+
+  updateVisitationInformation: (caseId, visitationInformation) => {
+    set((state) => {
+      const newCases = new Map(state.cases);
+      const caseData = newCases.get(caseId);
+      
+      if (!caseData) return state;
+
+      newCases.set(caseId, { ...caseData, visitationInformation });
+      return { cases: newCases };
+    });
+  },
+
   getCatalogItems: (caseId) => {
     const caseData = get().cases.get(caseId);
     return caseData?.catalogSelections;
@@ -177,5 +249,30 @@ export const useCaseStore = create<CaseStore>((set, get) => ({
     const nextNumber = String(maxNumber + 1).padStart(4, '0');
     
     return `${prefix}-${nextNumber}`;
+  },
+
+  addCase: (caseData) => {
+    const newId = Math.random().toString(36).substr(2, 9);
+    const newCaseNumber = get().generateCaseNumber();
+    const newCase: CaseData = {
+      id: newId,
+      caseNumber: newCaseNumber,
+      ...caseData,
+      catalogSelections: {
+        package: undefined,
+        addons: [],
+        memorials: [],
+      },
+    };
+    set((state) => {
+      const newCases = new Map(state.cases);
+      newCases.set(newId, newCase);
+      return { cases: newCases };
+    });
+    return newCase;
+  },
+
+  getAllCases: () => {
+    return Array.from(get().cases.values());
   },
 }));

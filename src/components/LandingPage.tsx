@@ -85,8 +85,8 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             {/* CTA Button */}
             <div className="relative hidden md:inline-flex group">
               <button
-                onClick={() => onNavigate("login")}
-                className="relative inline-flex items-center justify-center px-8 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
+                onClick={() => onNavigate('login')}
+                className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all"
               >
                 Get Started
               </button>
@@ -147,10 +147,10 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             {/* Left Content */}
             <div>
               <h1 className="text-5xl text-slate-800 sm:text-6xl lg:text-7xl leading-tight">
-                Serve Families{" "}
+                First Call.{" "}
                 <span className="relative inline-block">
                   <span className="text-indigo-600 animate-typing">
-                    Save Time
+                    Done Rite.
                   </span>
                   <svg
                     className="absolute -bottom-2 left-0 w-full"
@@ -170,24 +170,23 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                 </span>
               </h1>
               <p className="mt-6 text-xl text-slate-600 leading-relaxed">
-                Rite Path unifies all critical workflows into
-                one intuitive experience. From first call to
-                final arrangements, we help funeral homes serve
-                families with dignity, efficiency, and
-                compassion.
+                Modern Funeral case management. <br />From first call
+                to final documentation. When the
+                workflow is right, families get better care- and
+                your team gets back time.
               </p>
 
               {/* CTA Buttons */}
               <div className="mt-10">
                 <div className="flex flex-wrap gap-4">
                   <button
-                    onClick={() => onNavigate("login")}
+                    onClick={() => onNavigate('login')}
                     className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
                   >
                     Start Free Trial →
                   </button>
-                  <button className="inline-flex items-center justify-center px-8 py-4 text-base text-slate-700 bg-white border-2 border-slate-300 rounded-full hover:border-slate-400 hover:shadow-lg hover:scale-105 transition-all duration-200">
-                    Schedule Demo
+                  <button className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-slate-600 border-2 border-gray/400 rounded-full hover:bg-slate/600 hover:shadow-xl hover:scale-105 transition-all duration-200 backdrop-blur-sm">
+                    Contact Us
                   </button>
                 </div>
 
@@ -921,7 +920,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
 
             <div className="flex flex-wrap justify-center gap-4">
               <button
-                onClick={() => onNavigate("login")}
+                onClick={() => onNavigate('login')}
                 className="inline-flex items-center justify-center px-8 py-4 text-base text-slate-700 bg-white rounded-full hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-200"
               >
                 Start Free Trial →

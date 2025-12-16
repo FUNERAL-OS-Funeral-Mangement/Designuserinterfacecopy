@@ -15,10 +15,33 @@ export function ShareCatalogModal({ caseId, decedentName, onClose }: ShareCatalo
   // Generate unique shareable link
   const shareLink = `${window.location.origin}/family-catalog/${caseId}`;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyLink = async () => {
+    try {
+      // Try modern clipboard API first
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareLink;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        textArea.remove();
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      } catch (fallbackErr) {
+        console.error('Failed to copy:', fallbackErr);
+      }
+    }
   };
 
   const handleSendEmail = () => {

@@ -4,6 +4,7 @@ import { FirstCallDetails } from './FirstCallDetails';
 import { CreateCase } from './CreateCase';
 import { CaseDetails } from './CaseDetails';
 import { SendEFax } from './SendEFax';
+import { useCaseStore } from '../store/useCaseStore';
 
 interface FirstCallProps {
   onBack: () => void;
@@ -16,6 +17,7 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
   const [currentView, setCurrentView] = useState<FirstCallView>('details');
   const [caseCreated, setCaseCreated] = useState(false);
   const [caseNumber, setCaseNumber] = useState(1);
+  const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     callerName: '',
     callerPhone: '',
@@ -30,8 +32,19 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
     readyTime: '',
   });
 
+  const addCase = useCaseStore((state) => state.addCase);
+
   const handleCreateCase = (data: typeof formData) => {
     setFormData(data);
+    
+    // Create case in store
+    const newCase = addCase({
+      deceasedName: data.deceasedName,
+      caseType: 'At-Need',
+      dateCreated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    });
+    
+    setCreatedCaseId(newCase.id);
     setCurrentView('create-case');
   };
 

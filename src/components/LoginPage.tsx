@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { authHelpers } from '../lib/supabase';
+import { authHelpers, isSupabaseConfigured } from '../lib/supabase';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -46,12 +46,12 @@ export function LoginPage({ onLogin, onBack }: LoginPageProps) {
         if (error) {
           setError(error.message);
         } else if (data.session) {
-          // Successfully signed in
+          // Successfully signed in - navigate to dashboard in current window
           onLogin();
         }
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
