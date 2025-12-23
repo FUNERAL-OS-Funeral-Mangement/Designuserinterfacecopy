@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Package, Plus, Check, ShoppingCart, ArrowLeft, Edit2, Info } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useCaseStore } from '../store/useCaseStore';
+import { useCatalogStore } from '../store/useCatalogStore';
 import { ServiceInformationModal } from './ServiceInformationModal';
 import { EditIncludedItemModal } from './EditIncludedItemModal';
 import { includedItemsData } from './IncludedItemModal';
@@ -12,137 +13,13 @@ interface StaffCatalogViewProps {
   onBack: () => void;
 }
 
-// Package data
-const packages = [
-  {
-    id: 'pkg-basic',
-    name: 'Basic Service Package',
-    description: 'Essential services for a dignified memorial',
-    price: 2500,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=400',
-    included: [
-      { key: 'professional-service', label: 'Basic services of funeral director and staff' },
-      { key: 'transfer-remains', label: 'Transfer of remains to funeral home' },
-      { key: 'embalming-preparation', label: 'Embalming or refrigeration' },
-      { label: 'Basic memorial service at funeral home' },
-      { key: 'visitation-facilities', label: 'Use of facilities for viewing (1 day)' },
-      { key: 'coordination-services', label: 'Coordination with cemetery/crematory' },
-      { label: 'Assistance with death certificates and permits' },
-    ],
-  },
-  {
-    id: 'pkg-celebration',
-    name: 'Celebration of Life Package',
-    description: 'Comprehensive celebration with personalized touches',
-    price: 4200,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f29da8c43f?w=400',
-    included: [
-      { label: 'All Basic Package services' },
-      { key: 'visitation-facilities', label: 'Extended facility use (2 days)' },
-      { label: 'Audio/visual equipment for slideshows' },
-      { label: 'Memory table setup' },
-      { label: 'Guest register book' },
-      { key: 'memorial-materials', label: 'Memorial folders (100 count)' },
-      { label: 'Online obituary posting' },
-      { label: 'Reception coordination (up to 50 guests)' },
-    ],
-  },
-  {
-    id: 'pkg-premium',
-    name: 'Premium Memorial Package',
-    description: 'Full-service premium memorial experience',
-    price: 6500,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400',
-    included: [
-      { label: 'All Celebration Package services' },
-      { key: 'visitation-facilities', label: 'Extended facility use (3 days)' },
-      { label: 'Premium casket or urn selection' },
-      { label: 'Professional tribute video production' },
-      { label: 'Customized memorial website (1 year)' },
-      { key: 'hearse-transport', label: 'Transportation in luxury vehicle' },
-      { label: 'Floral arrangement coordination' },
-      { label: 'Live streaming service' },
-      { label: 'Memorial DVD copies (10 count)' },
-      { label: 'Personalized keepsakes for family' },
-    ],
-  },
-  {
-    id: 'pkg-cremation',
-    name: 'Direct Cremation Package',
-    description: 'Simple and respectful cremation service',
-    price: 1800,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1518709594023-6eab9bab7b23?w=400',
-    included: [
-      { key: 'professional-service', label: 'Basic services of funeral director' },
-      { key: 'transfer-remains', label: 'Transfer of remains' },
-      { label: 'Refrigeration (up to 5 days)' },
-      { label: 'Crematory fees' },
-      { label: 'Basic cremation container' },
-      { label: 'Basic urn' },
-      { label: 'Assistance with permits and certificates' },
-    ],
-  },
-  {
-    id: 'pkg-burial',
-    name: 'Burial Package',
-    description: 'Traditional burial service with full arrangements',
-    price: 5200,
-    category: 'package' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    included: [
-      { label: 'All Basic Package services' },
-      { label: 'Casket selection assistance' },
-      { label: 'Graveside service coordination' },
-      { key: 'hearse-transport', label: 'Hearse and lead car' },
-      { key: 'coordination-services', label: 'Cemetery coordination' },
-      { label: 'Flower car service' },
-      { label: 'Burial vault arrangements' },
-      { label: 'Extended viewing (2 days)' },
-      { key: 'memorial-materials', label: 'Memorial folders (150 count)' },
-    ],
-  },
-];
-
-const addons = [
-  {
-    id: 'addon-prayer-cards',
-    name: 'Prayer Cards',
-    description: 'Custom printed prayer cards (set of 100)',
-    price: 150,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-  },
-  {
-    id: 'addon-tribute-video',
-    name: 'Tribute Video / Slideshow',
-    description: 'Professional video tribute with music',
-    price: 400,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400',
-  },
-  {
-    id: 'addon-dove-release',
-    name: 'Dove Release',
-    description: 'Ceremonial white dove release',
-    price: 350,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1551198509-a025f0a3d3cb?w=400',
-  },
-  {
-    id: 'addon-limousine',
-    name: 'Limousine',
-    description: 'Professional limousine service for family',
-    price: 450,
-    category: 'addon' as const,
-    imageUrl: 'https://images.unsplash.com/photo-1567225591450-0bd5ff4b5e4f?w=400',
-  },
-];
+// Remove hardcoded data - now using global store
 
 export function StaffCatalogView({ caseId, onBack }: StaffCatalogViewProps) {
+  // Get catalog data from global store
+  const packages = useCatalogStore((state) => state.packages);
+  const addonsFromStore = useCatalogStore((state) => state.addons);
+  
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedAddons, setSelectedAddons] = useState<any[]>([]);
   const [view, setView] = useState<'packages' | 'addons'>('packages');
@@ -154,7 +31,7 @@ export function StaffCatalogView({ caseId, onBack }: StaffCatalogViewProps) {
   const updateServiceInformation = useCaseStore((state) => state.updateServiceInformation);
   const caseData = useCaseStore((state) => state.cases.get(caseId));
 
-  const currentItems = view === 'packages' ? packages : addons;
+  const currentItems = view === 'packages' ? packages : addonsFromStore;
 
   const handleSelectPackage = (pkg: any) => {
     setPendingPackage(pkg);

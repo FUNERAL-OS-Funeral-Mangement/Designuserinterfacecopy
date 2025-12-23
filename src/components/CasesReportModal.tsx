@@ -6,10 +6,10 @@ interface CaseData {
   caseNumber: number | string;
   dateCreated: string;
   deceasedName: string;
-  caseType: 'At-Need' | 'Pre-Need';
-  serviceType: string;
+  caseType: 'At-Need' | 'Pre-Need' | string;
+  serviceType?: string;
   location?: string;
-  assignedTo: string;
+  assignedTo?: string;
 }
 
 interface CasesReportModalProps {
@@ -251,7 +251,7 @@ export function CasesReportModal({ show, onClose, cases }: CasesReportModalProps
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{reportData.dateReceived}</td>
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{reportData.dateOfDeath}</td>
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{caseData.caseType}</td>
-                          <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{caseData.serviceType}</td>
+                          <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{caseData.serviceType || 'Not specified'}</td>
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{reportData.embalmerName}</td>
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-700 font-mono text-[10px]">{reportData.embalmerLicense}</td>
                           <td className="px-3 py-2 border-r border-gray-300 text-gray-800">{reportData.methodOfDisposal}</td>
@@ -287,7 +287,7 @@ export function CasesReportModal({ show, onClose, cases }: CasesReportModalProps
                         <div>
                           <h3 className="text-gray-900">Case #{caseData.caseNumber}</h3>
                           <p className="text-sm text-gray-600 mt-0.5">
-                            {caseData.caseType} • {caseData.serviceType}
+                            {caseData.caseType}{caseData.serviceType ? ` • ${caseData.serviceType}` : ''}
                           </p>
                         </div>
                         <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs border border-emerald-200">

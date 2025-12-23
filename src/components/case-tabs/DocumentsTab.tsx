@@ -1,6 +1,8 @@
 import { FileText, Download, Eye, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { ContractItemization } from './ContractItemization';
+import { FirstCallSheet } from '../FirstCallSheet';
+import { useCaseStore } from '../../store/useCaseStore';
 
 interface DocumentsTabProps {
   caseId?: string;
@@ -8,14 +10,22 @@ interface DocumentsTabProps {
 
 export function DocumentsTab({ caseId = '1' }: DocumentsTabProps) {
   const [showContractItemization, setShowContractItemization] = useState(false);
+  const [showFirstCallSheet, setShowFirstCallSheet] = useState(false);
+  
+  const getCaseById = useCaseStore((state) => state.getCaseById);
+  const caseData = getCaseById(caseId);
 
   if (showContractItemization) {
     return <ContractItemization caseId={caseId} onBack={() => setShowContractItemization(false)} />;
   }
 
+  if (showFirstCallSheet) {
+    return <FirstCallSheet onBack={() => setShowFirstCallSheet(false)} firstCallData={caseData?.firstCallData} />;
+  }
+
   const documents = [
-    { name: 'Removal Release', status: 'signed' as const, icon: FileText },
-    { name: 'First Call Sheet', status: 'signed' as const, icon: FileText },
+    { name: 'Removal Release', status: (caseData?.hasRemovalRelease ? 'signed' : 'pending') as const, icon: FileText },
+    { name: 'First Call Sheet', status: (caseData?.firstCallData ? 'signed' : 'pending') as const, icon: FileText },
     { name: 'Authorization Forms', status: 'pending' as const, icon: FileText },
     { name: 'Cremation Documents', status: 'missing' as const, icon: FileText },
     { name: 'Contract & Itemization', status: 'signed' as const, icon: FileText },
@@ -81,11 +91,13 @@ export function DocumentsTab({ caseId = '1' }: DocumentsTabProps) {
             <div 
               key={index} 
               className={`px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between gap-4 ${
-                doc.name === 'Contract & Itemization' ? 'cursor-pointer' : ''
+                doc.name === 'Contract & Itemization' || doc.name === 'First Call Sheet' ? 'cursor-pointer' : ''
               }`}
               onClick={() => {
                 if (doc.name === 'Contract & Itemization') {
                   setShowContractItemization(true);
+                } else if (doc.name === 'First Call Sheet') {
+                  setShowFirstCallSheet(true);
                 }
               }}
             >
@@ -107,6 +119,8 @@ export function DocumentsTab({ caseId = '1' }: DocumentsTabProps) {
                       e.stopPropagation();
                       if (doc.name === 'Contract & Itemization') {
                         setShowContractItemization(true);
+                      } else if (doc.name === 'First Call Sheet') {
+                        setShowFirstCallSheet(true);
                       }
                     }}
                   >

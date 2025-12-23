@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useUser, useClerk, MockClerkProvider } from './components/MockClerkProvider';
 import { LandingPage } from './components/LandingPage';
-import { LoginPage } from './components/LoginPage';
 import { Dashboard } from './components/Dashboard';
 import { FirstCall } from './components/FirstCall';
+import { FirstCallTimeline } from './components/FirstCallTimeline';
 import { Cases } from './components/Cases';
 import { CaseDetailPage } from './components/CaseDetailPage';
 import { Appointments } from './components/Appointments';
@@ -11,15 +12,18 @@ import { CatalogLink } from './components/CatalogLink';
 import { FamilyCatalogView } from './components/FamilyCatalogView';
 import { Catalogs } from './components/Catalogs';
 import { DocumentLibrary } from './components/DocumentLibrary';
-import { authHelpers } from './lib/supabase';
+import { StaffAndVendors } from './components/StaffAndVendors';
 
-export type ViewType = 'landing' | 'login' | 'dashboard' | 'first-call' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog' | 'catalogs' | 'document-library';
+export type ViewType = 'landing' | 'dashboard' | 'first-call' | 'first-call-timeline' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog' | 'catalogs' | 'document-library' | 'staff-vendors';
 
-export default function App() {
+const CLERK_PUBLISHABLE_KEY = 'pk_test_c2V0dGxlZC1kcmFnb24tNC5jbGVyay5hY2NvdW50cy5kZXYk';
+
+function AppContent() {
   const [currentView, setCurrentView] = useState<ViewType>('landing');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCase, setSelectedCase] = useState<any>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  
+  const { isSignedIn, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
   // Check URL parameters on mount
   useEffect(() => {
@@ -34,59 +38,30 @@ export default function App() {
     }
     
     // View parameter
-    if (view === 'login') {
-      setCurrentView('login');
-      return;
+    if (view === 'dashboard' && isSignedIn) {
+      setCurrentView('dashboard');
     }
-    
-    if (view === 'dashboard') {
-      // Check if user has a session
-      authHelpers.getSession().then(({ session }) => {
-        if (session) {
-          setIsLoggedIn(true);
-          setCurrentView('dashboard');
-        }
-      });
-    }
-  }, []);
+  }, [isSignedIn]);
 
-  // Listen for auth state changes
+  // Navigate to dashboard when user signs in
   useEffect(() => {
-    const { data: { subscription } } = authHelpers.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        setIsLoggedIn(true);
-      } else if (event === 'SIGNED_OUT') {
-        setIsLoggedIn(false);
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setCurrentView('dashboard');
-  };
-
-  const handleLogout = async () => {
-    try {
-      await authHelpers.signOut();
-      setIsLoggedIn(false);
-      setCurrentView('landing');
-    } catch (error) {
-      console.error('Error signing out:', error);
+    if (isSignedIn && currentView === 'landing') {
+      setCurrentView('dashboard');
     }
-  };
+  }, [isSignedIn, currentView]);
 
   const handleCaseClick = (caseData: any) => {
     setSelectedCase(caseData);
     setCurrentView('case-detail');
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    setCurrentView('landing');
+  };
+
   // Show loading screen while checking auth
-  if (isCheckingAuth) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-500">Loading...</div>
@@ -99,8 +74,8 @@ export default function App() {
     return <FamilyCatalogView />;
   }
 
-  // Redirect to landing if not logged in (except for landing and login pages)
-  if (!isLoggedIn && currentView !== 'landing' && currentView !== 'login') {
+  // Redirect to landing if not logged in (except for landing page)
+  if (!isSignedIn && currentView !== 'landing') {
     return <LandingPage onNavigate={setCurrentView} />;
   }
 
@@ -109,14 +84,14 @@ export default function App() {
     case 'landing':
       return <LandingPage onNavigate={setCurrentView} />;
     
-    case 'login':
-      return <LoginPage onLogin={handleLogin} onBack={() => setCurrentView('landing')} />;
-    
     case 'dashboard':
       return <Dashboard onNavigate={setCurrentView} onLogout={handleLogout} />;
     
     case 'first-call':
       return <FirstCall onBack={() => setCurrentView('dashboard')} onNavigateToCases={() => setCurrentView('cases')} />;
+    
+    case 'first-call-timeline':
+      return <FirstCallTimeline onBack={() => setCurrentView('dashboard')} onNavigateToCases={() => setCurrentView('cases')} />;
     
     case 'cases':
       return <Cases onBack={() => setCurrentView('dashboard')} onCaseClick={handleCaseClick} />;
@@ -149,7 +124,18 @@ export default function App() {
     case 'document-library':
       return <DocumentLibrary onBack={() => setCurrentView('dashboard')} />;
     
+    case 'staff-vendors':
+      return <StaffAndVendors onBack={() => setCurrentView('dashboard')} />;
+    
     default:
       return <LandingPage onNavigate={setCurrentView} />;
   }
+}
+
+export default function App() {
+  return (
+    <MockClerkProvider>
+      <AppContent />
+    </MockClerkProvider>
+  );
 }

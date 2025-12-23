@@ -1,90 +1,294 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+// =====================================================
+// SUPABASE CLIENT - React App
+// =====================================================
+// Client-side Supabase configuration
+// Integrates with Clerk for authentication
 
-// Supabase configuration
-// TODO: Replace these with your actual Supabase project credentials from:
-// Supabase Dashboard > Project Settings > API
-const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 'https://vfvhjfuaegrpsqzhadfu.supabase.co';
-const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmdmhqZnVhZWdycHNxemhhZGZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5MDM1OTksImV4cCI6MjA4MDQ3OTU5OX0.-CjCd-f50RMiDJrxy9TRi91LkJx2fEFcRxVO3P6LHCM';
+import { createClient } from '@supabase/supabase-js'
 
-// Create Supabase client
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+// Safe environment variable access with fallbacks
+const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || ''
+const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || ''
 
-// Check if Supabase is properly configured
-export const isSupabaseConfigured = () => {
-  return supabaseUrl !== 'https://placeholder.supabase.co' && 
-         supabaseAnonKey !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTI4MDAsImV4cCI6MTk2MDc2ODgwMH0.placeholder' &&
-         !supabaseUrl.includes('placeholder');
-};
+// Create a dummy client if credentials are missing (for development)
+const createSupabaseClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('⚠️ Supabase credentials not found. Using mock client.')
+    console.warn('📝 Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file')
+    
+    // Return a mock client for development (prevents crashes)
+    return createClient(
+      'https://placeholder.supabase.co',
+      'placeholder-anon-key'
+    )
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
 
-// Auth helper functions
-export const authHelpers = {
-  // Sign in with email and password
-  signIn: async (email: string, password: string) => {
-    if (!isSupabaseConfigured()) {
-      throw new Error('Supabase is not configured. Please add your project URL and anon key.');
-    }
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
-  },
+export const supabase = createSupabaseClient()
 
-  // Sign up with email and password
-  signUp: async (email: string, password: string) => {
-    if (!isSupabaseConfigured()) {
-      throw new Error('Supabase is not configured. Please add your project URL and anon key.');
-    }
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { data, error };
-  },
+// =====================================================
+// CLERK + SUPABASE INTEGRATION (OPTIONAL)
+// =====================================================
+// If you want to use Clerk user tokens with Supabase RLS:
+//
+// import { useAuth } from '@clerk/clerk-react'
+//
+// export function useSupabaseClient() {
+//   const { getToken } = useAuth()
+//   
+//   return createClient(supabaseUrl, supabaseAnonKey, {
+//     global: {
+//       headers: async () => {
+//         const token = await getToken({ template: 'supabase' })
+//         return { Authorization: `Bearer ${token}` }
+//       }
+//     }
+//   })
+// }
 
-  // Sign out
-  signOut: async () => {
-    if (!isSupabaseConfigured()) {
-      return { error: null };
-    }
-    const { error } = await supabase.auth.signOut();
-    return { error };
-  },
+// =====================================================
+// TYPE DEFINITIONS
+// =====================================================
 
-  // Reset password
-  resetPassword: async (email: string) => {
-    if (!isSupabaseConfigured()) {
-      throw new Error('Supabase is not configured. Please add your project URL and anon key.');
-    }
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    return { data, error };
-  },
+export interface Case {
+  id: string
+  deceased_name: string
+  next_of_kin_name: string
+  family_contact_name?: string
+  caller_name?: string
+  caller_phone?: string
+  caller_relationship?: string
+  address?: string
+  status: string
+  current_stage: string
+  completed_stages: string[]
+  intake_complete: boolean
+  documents_generated: number
+  signatures_received: number
+  signatures_total: number
+  faxes_sent: number
+  faxes_total: number
+  time_of_death?: string
+  metadata?: any
+  created_at: string
+  updated_at: string
+}
 
-  // Get current user
-  getCurrentUser: async () => {
-    if (!isSupabaseConfigured()) {
-      return { user: null, error: null };
-    }
-    const { data: { user }, error } = await supabase.auth.getUser();
-    return { user, error };
-  },
+export interface SignatureRequest {
+  id: string
+  case_id: string
+  document_type: string
+  document_name: string
+  esign_provider: string
+  esign_request_id?: string
+  esign_signature_id?: string
+  status: string
+  signer_name: string
+  signer_email: string
+  signer_phone?: string
+  signer_role?: string
+  unsigned_document_url?: string
+  signed_document_url?: string
+  created_at: string
+  sent_at?: string
+  delivered_at?: string
+  viewed_at?: string
+  signed_at?: string
+  completed_at?: string
+  error_message?: string
+  retry_count: number
+  metadata?: any
+}
 
-  // Get current session
-  getSession: async () => {
-    if (!isSupabaseConfigured()) {
-      return { session: null, error: null };
-    }
-    const { data: { session }, error } = await supabase.auth.getSession();
-    return { session, error };
-  },
+export interface FaxRequest {
+  id: string
+  case_id: string
+  signature_request_id?: string
+  document_type: string
+  document_name: string
+  document_url: string
+  recipient_name: string
+  recipient_fax: string
+  recipient_type?: string
+  fax_provider: string
+  fax_provider_id?: string
+  status: string
+  created_at: string
+  queued_at?: string
+  sent_at?: string
+  delivered_at?: string
+  error_message?: string
+  retry_count: number
+  metadata?: any
+}
 
-  // Listen to auth state changes
-  onAuthStateChange: (callback: (event: string, session: any) => void) => {
-    if (!isSupabaseConfigured()) {
-      return { data: { subscription: { unsubscribe: () => {} } } };
-    }
-    return supabase.auth.onAuthStateChange(callback);
-  },
-};
+// =====================================================
+// HELPER FUNCTIONS
+// =====================================================
+
+/**
+ * Send a document for eSignature
+ */
+export async function sendForSignature(params: {
+  caseId: string
+  documentType: string
+  documentName: string
+  signerName: string
+  signerEmail: string
+  signerPhone?: string
+  unsignedDocumentUrl: string
+  testMode?: boolean
+}) {
+  const { data, error } = await supabase.functions.invoke('send-for-signature', {
+    body: params
+  })
+
+  if (error) throw error
+  return data
+}
+
+/**
+ * Get all signature requests for a case
+ */
+export async function getSignatureRequests(caseId: string) {
+  const { data, error } = await supabase
+    .from('signature_requests')
+    .select('*')
+    .eq('case_id', caseId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data as SignatureRequest[]
+}
+
+/**
+ * Get a single case by ID
+ */
+export async function getCase(caseId: string) {
+  const { data, error } = await supabase
+    .from('cases')
+    .select('*')
+    .eq('id', caseId)
+    .single()
+
+  if (error) throw error
+  return data as Case
+}
+
+/**
+ * Update a case
+ */
+export async function updateCase(caseId: string, updates: Partial<Case>) {
+  const { data, error } = await supabase
+    .from('cases')
+    .update(updates)
+    .eq('id', caseId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Case
+}
+
+/**
+ * Create a new case
+ */
+export async function createCase(caseData: Partial<Case>) {
+  const { data, error } = await supabase
+    .from('cases')
+    .insert(caseData)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Case
+}
+
+/**
+ * Subscribe to case updates via Realtime
+ */
+export function subscribeToCaseUpdates(
+  caseId: string,
+  callback: (case_: Case) => void
+) {
+  return supabase
+    .channel(`case-${caseId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'cases',
+        filter: `id=eq.${caseId}`
+      },
+      (payload) => callback(payload.new as Case)
+    )
+    .subscribe()
+}
+
+/**
+ * Subscribe to signature request updates
+ */
+export function subscribeToSignatureUpdates(
+  caseId: string,
+  callback: (signatureRequest: SignatureRequest) => void
+) {
+  return supabase
+    .channel(`signatures-${caseId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'signature_requests',
+        filter: `case_id=eq.${caseId}`
+      },
+      (payload) => {
+        if (payload.new) {
+          callback(payload.new as SignatureRequest)
+        }
+      }
+    )
+    .subscribe()
+}
+
+/**
+ * Upload a file to Supabase Storage
+ */
+export async function uploadDocument(
+  caseId: string,
+  filename: string,
+  file: File | Blob
+) {
+  const path = `${caseId}/${filename}`
+  
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: true
+    })
+
+  if (error) throw error
+
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+    .from('documents')
+    .getPublicUrl(path)
+
+  return { path: data.path, url: publicUrl }
+}
+
+/**
+ * Download a document from Supabase Storage
+ */
+export async function downloadDocument(path: string) {
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .download(path)
+
+  if (error) throw error
+  return data
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SignInButton } from "./MockClerkProvider";
 import {
   Menu,
   X,
@@ -12,7 +13,7 @@ import {
 } from "lucide-react";
 
 interface LandingPageProps {
-  onNavigate: (view: "login" | "dashboard") => void;
+  onNavigate: (view: "dashboard") => void;
 }
 
 export function LandingPage({ onNavigate }: LandingPageProps) {
@@ -84,12 +85,13 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
 
             {/* CTA Button */}
             <div className="relative hidden md:inline-flex group">
-              <button
-                onClick={() => onNavigate('login')}
-                className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all"
-              >
-                Get Started
-              </button>
+              <SignInButton>
+                <button
+                  className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all"
+                >
+                  Get Started
+                </button>
+              </SignInButton>
             </div>
           </div>
 
@@ -122,12 +124,13 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                   Support
                 </a>
 
-                <button
-                  onClick={() => onNavigate("login")}
-                  className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all"
-                >
-                  Get Started
-                </button>
+                <SignInButton>
+                  <button
+                    className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all"
+                  >
+                    Get Started
+                  </button>
+                </SignInButton>
               </div>
             </nav>
           )}
@@ -179,12 +182,13 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               {/* CTA Buttons */}
               <div className="mt-10">
                 <div className="flex flex-wrap gap-4">
-                  <button
-                    onClick={() => onNavigate('login')}
-                    className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
-                  >
-                    Start Free Trial →
-                  </button>
+                  <SignInButton>
+                    <button
+                      className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
+                    >
+                      Start Free Trial →
+                    </button>
+                  </SignInButton>
                   <button className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-slate-600 border-2 border-gray/400 rounded-full hover:bg-slate/600 hover:shadow-xl hover:scale-105 transition-all duration-200 backdrop-blur-sm">
                     Contact Us
                   </button>
@@ -919,12 +923,13 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => onNavigate('login')}
-                className="inline-flex items-center justify-center px-8 py-4 text-base text-slate-700 bg-white rounded-full hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                Start Free Trial →
-              </button>
+              <SignInButton>
+                <button
+                  className="inline-flex items-center justify-center px-8 py-4 text-base text-slate-700 bg-white rounded-full hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-200"
+                >
+                  Start Free Trial →
+                </button>
+              </SignInButton>
               <button className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-white/10 border-2 border-white/30 rounded-full hover:bg-white/20 hover:shadow-xl hover:scale-105 transition-all duration-200 backdrop-blur-sm">
                 Schedule Demo
               </button>

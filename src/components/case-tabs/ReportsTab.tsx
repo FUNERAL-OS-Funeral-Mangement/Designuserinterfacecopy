@@ -3,7 +3,7 @@ import { Download, Send, FileText, Calendar, Filter, User, MapPin, FileSignature
 
 interface ReportsTabProps {
   caseId: string;
-  caseNumber: number;
+  caseNumber: string | number;
   deceasedName: string;
   dateCreated: string;
 }

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { LogoUpload } from "./LogoUpload";
 import eduardoLogo from "figma:asset/4f4413d53848e948d0d7a0a9be4a11765dd0c149.png";
 import ritePathLogo from "figma:asset/004a81e9bfe8a591307cff80ff24ed76f8e8a0e0.png";
 import {
@@ -18,7 +19,10 @@ import {
   BookOpen,
   ShoppingBag,
   Archive,
+  Pencil,
+  Check,
 } from "lucide-react";
+import { useAppointmentStore } from "../store/useAppointmentStore";
 
 interface DashboardProps {
   onNavigate: (view: ViewType) => void;
@@ -30,6 +34,69 @@ export function Dashboard({
   onLogout,
 }: DashboardProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [funeralHomeLogo, setFuneralHomeLogo] = useState(eduardoLogo);
+  const [funeralHomeName, setFuneralHomeName] = useState("Eduardo Rivero Funeral Home");
+  const [funeralHomeTagline, setFuneralHomeTagline] = useState("Serving families with dignity");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingTagline, setIsEditingTagline] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const taglineInputRef = useRef<HTMLInputElement>(null);
+  
+  // Get appointments from store
+  const appointments = useAppointmentStore((state) => state.appointments);
+
+  // Memoize today's appointments to prevent infinite loops
+  const todaysAppointments = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return appointments.filter((apt) => apt.date === today);
+  }, [appointments]);
+
+  // Get next appointment time
+  const nextAppointmentTime = todaysAppointments.length > 0 ? todaysAppointments[0].time : 'None today';
+
+  const handleLogoUpdate = (newLogoUrl: string) => {
+    setFuneralHomeLogo(newLogoUrl);
+    console.log('Logo updated:', newLogoUrl);
+  };
+
+  const handleNameUpdate = (newName: string) => {
+    setFuneralHomeName(newName);
+    console.log('Name updated:', newName);
+  };
+
+  const handleNameEdit = () => {
+    setIsEditingName(true);
+    setTimeout(() => nameInputRef.current?.focus(), 0);
+  };
+
+  const handleNameSave = () => {
+    setIsEditingName(false);
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditingName(false);
+    } else if (e.key === 'Escape') {
+      setIsEditingName(false);
+    }
+  };
+
+  const handleTaglineEdit = () => {
+    setIsEditingTagline(true);
+    setTimeout(() => taglineInputRef.current?.focus(), 0);
+  };
+
+  const handleTaglineSave = () => {
+    setIsEditingTagline(false);
+  };
+
+  const handleTaglineKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditingTagline(false);
+    } else if (e.key === 'Escape') {
+      setIsEditingTagline(false);
+    }
+  };
 
   const stats = [
     {
@@ -51,8 +118,8 @@ export function Dashboard({
     {
       icon: Calendar,
       label: "Appointments Today",
-      value: "3",
-      subtext: "Next at 10:00 AM",
+      value: todaysAppointments.length.toString(),
+      subtext: nextAppointmentTime !== 'None today' ? `Next at ${nextAppointmentTime}` : 'None today',
       iconBg: "bg-purple-50",
       iconColor: "text-purple-600",
     },
@@ -71,7 +138,7 @@ export function Dashboard({
       icon: Phone,
       label: "First Call Intake",
       description: "Start new case intake",
-      view: "first-call" as ViewType,
+      view: "first-call-timeline" as ViewType,
       iconBg: "bg-purple-600",
     },
     {
@@ -142,29 +209,96 @@ export function Dashboard({
       <aside className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 bg-white border-r border-gray-200 flex-shrink-0">
         <div className="flex-1 flex flex-col min-h-0">
           {/* Logo Section - Clean & Minimal */}
-          <div className="flex-shrink-0 p-6 text-center border-b border-gray-200">
+          <div className="flex-shrink-0 p-6 text-center border-b border-gray-200 relative">
             {/* Back to Home Button - Top Left */}
             <button
-              onClick={() => window.location.href = '/'}
-              className="absolute top-6 left-6 flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors text-sm"
+              onClick={() => onNavigate('landing')}
+              className="absolute top-6 left-6 z-30 flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
             </button>
             
-            <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 border border-gray-300 p-4">
-              <img
-                src={eduardoLogo}
-                alt="Eduardo Rivero"
-                className="w-full h-full object-contain"
-              />
+            <LogoUpload
+              currentLogo={funeralHomeLogo}
+              funeralHomeName={funeralHomeName}
+              onLogoUpdate={handleLogoUpdate}
+              onNameUpdate={handleNameUpdate}
+              userId="demo-user-123"
+            />
+            
+            {/* Editable Funeral Home Name */}
+            <div className="mt-2 mb-5 group/name relative">
+              {isEditingName ? (
+                <div className="flex items-center justify-center gap-2">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={funeralHomeName}
+                    onChange={(e) => setFuneralHomeName(e.target.value)}
+                    onBlur={handleNameSave}
+                    onKeyDown={handleNameKeyDown}
+                    className="text-gray-900 text-base text-center border border-blue-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleNameSave}
+                    className="p-1 text-green-600 hover:text-green-700 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <h2 className="text-gray-900 text-base">
+                    {funeralHomeName}
+                  </h2>
+                  <button
+                    onClick={handleNameEdit}
+                    className="opacity-0 group-hover/name:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition-all"
+                    title="Edit name"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
-            <h2 className="text-gray-900 mb-5 text-base">
-              Eduardo Rivero Funeral HOme
-            </h2>
-            <p className="text-sm text-gray-500">
-              Serving families with dignity
-            </p>
+            
+            {/* Editable Funeral Home Tagline */}
+            <div className="group/tagline relative">
+              {isEditingTagline ? (
+                <div className="flex items-center justify-center gap-2">
+                  <input
+                    ref={taglineInputRef}
+                    type="text"
+                    value={funeralHomeTagline}
+                    onChange={(e) => setFuneralHomeTagline(e.target.value)}
+                    onBlur={handleTaglineSave}
+                    onKeyDown={handleTaglineKeyDown}
+                    className="text-gray-900 text-base text-center border border-blue-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleTaglineSave}
+                    className="p-1 text-green-600 hover:text-green-700 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <h2 className="text-gray-900 text-base">
+                    {funeralHomeTagline}
+                  </h2>
+                  <button
+                    onClick={handleTaglineEdit}
+                    className="opacity-0 group-hover/tagline:opacity-100 p-1 text-gray-400 hover:text-gray-600 transition-all"
+                    title="Edit tagline"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+            
           </div>
 
           {/* Quick Actions */}
@@ -217,26 +351,6 @@ export function Dashboard({
                 </div>
               </button>
               
-              {/* Staff and Vendors Button */}
-              <button
-                onClick={() => alert('Staff and Vendors coming soon!')}
-                className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-                    <ShoppingBag className="w-4.5 h-4.5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
-                      Staff and Vendors
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-tight">
-                      Manage inventory & suppliers
-                    </p>
-                  </div>
-                </div>
-              </button>
-                   
               {/* Document Library */}
               <button
                 onClick={() => onNavigate('document-library')}
@@ -252,6 +366,26 @@ export function Dashboard({
                     </h4>
                     <p className="text-xs text-gray-500 leading-tight">
                       Manage All types of Documents 
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Staff & Vendors */}
+              <button
+                onClick={() => onNavigate('staff-vendors')}
+                className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                    <Users className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-gray-900 text-sm mb-0.5 leading-tight group-hover:text-blue-700 transition-colors">
+                      Staff & Vendors
+                    </h4>
+                    <p className="text-xs text-gray-500 leading-tight">
+                      Manage teams and vendors
                     </p>
                   </div>
                 </div>

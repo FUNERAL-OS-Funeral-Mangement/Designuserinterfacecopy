@@ -3,6 +3,7 @@ import { create } from 'zustand';
 export interface CaseData {
   caseId: string;
   deceasedName: string;
+  dateOfBirth?: string;
   locationOfPickup: string;
   timeOfDeath: string;
   releaseFormUrl: string;

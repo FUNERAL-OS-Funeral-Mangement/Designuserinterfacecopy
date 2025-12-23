@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { FirstCallDashboard } from './FirstCallDashboard';
 import { FirstCallDetails } from './FirstCallDetails';
 import { CreateCase } from './CreateCase';
+import { ScheduleAppointment } from './ScheduleAppointment';
 import { CaseDetails } from './CaseDetails';
 import { SendEFax } from './SendEFax';
 import { useCaseStore } from '../store/useCaseStore';
@@ -11,10 +13,10 @@ interface FirstCallProps {
   onNavigateToCases?: () => void;
 }
 
-type FirstCallView = 'details' | 'create-case' | 'case' | 'efax';
+type FirstCallView = 'dashboard' | 'details' | 'create-case' | 'schedule-appointment' | 'case' | 'efax';
 
 export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
-  const [currentView, setCurrentView] = useState<FirstCallView>('details');
+  const [currentView, setCurrentView] = useState<FirstCallView>('dashboard');
   const [caseCreated, setCaseCreated] = useState(false);
   const [caseNumber, setCaseNumber] = useState(1);
   const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
@@ -22,6 +24,7 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
     callerName: '',
     callerPhone: '',
     deceasedName: '',
+    dateOfBirth: '',
     dateOfDeath: '',
     timeOfDeath: '',
     locationOfDeath: '',
@@ -30,6 +33,9 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
     nextOfKinPhone: '',
     weight: '',
     readyTime: '',
+    isVerbalRelease: false,
+    hasStairs: '',
+    isFamilyPresent: '',
   });
 
   const addCase = useCaseStore((state) => state.addCase);
@@ -37,11 +43,12 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
   const handleCreateCase = (data: typeof formData) => {
     setFormData(data);
     
-    // Create case in store
+    // Create case in store with verbal release flag
     const newCase = addCase({
       deceasedName: data.deceasedName,
       caseType: 'At-Need',
       dateCreated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      isVerbalRelease: data.isVerbalRelease,
     });
     
     setCreatedCaseId(newCase.id);
@@ -49,8 +56,19 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
   };
 
   const handleContinueFromCreateCase = () => {
+    // Go to appointment scheduling
+    setCurrentView('schedule-appointment');
+  };
+
+  const handleAppointmentScheduled = () => {
+    // After scheduling, go to case details
     setCaseCreated(true);
     setCurrentView('case');
+  };
+
+  const handleBackFromAppointment = () => {
+    // Go back to create case review
+    setCurrentView('create-case');
   };
 
   const handleSendEFax = () => {
@@ -66,9 +84,16 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {currentView === 'dashboard' && (
+        <FirstCallDashboard
+          onBack={onBack}
+          onCreateNew={() => setCurrentView('details')}
+        />
+      )}
+      
       {currentView === 'details' && (
         <FirstCallDetails
-          onBack={onBack}
+          onBack={() => setCurrentView('dashboard')}
           onCreateCase={handleCreateCase}
         />
       )}
@@ -80,11 +105,25 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
           onContinue={handleContinueFromCreateCase}
         />
       )}
+
+      {currentView === 'schedule-appointment' && createdCaseId && (
+        <ScheduleAppointment
+          onBack={handleBackFromAppointment}
+          onScheduled={handleAppointmentScheduled}
+          caseId={createdCaseId}
+          familyName={formData.deceasedName}
+          nextOfKinName={formData.nextOfKinName}
+          nextOfKinPhone={formData.nextOfKinPhone}
+        />
+      )}
       
-      {currentView === 'case' && (
+      {currentView === 'case' && createdCaseId && (
         <CaseDetails
           onBack={() => setCurrentView('details')}
           onSendEFax={handleSendEFax}
+          caseId={createdCaseId}
+          formData={formData}
+          onNavigateToCases={onNavigateToCases}
         />
       )}
       
@@ -92,6 +131,7 @@ export function FirstCall({ onBack, onNavigateToCases }: FirstCallProps) {
         <SendEFax
           onBack={() => setCurrentView('case')}
           onCreateCase={handleCreateFullCase}
+          onBackToDashboard={onBack}
         />
       )}
     </div>

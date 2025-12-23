@@ -439,7 +439,7 @@ export function CatalogSelection({ caseType, caseData, onComplete, onBack }: Cat
               </button>
               <button
                 onClick={handleContinue}
-                disabled={!selectedPackage}
+                disabled={!selectedPackage && selectedAddons.length === 0}
                 className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue to Items

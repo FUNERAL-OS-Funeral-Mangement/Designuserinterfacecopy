@@ -41,6 +41,25 @@ export interface VisitationInformation {
   address?: string;
 }
 
+export interface FirstCallData {
+  callerName?: string;
+  callerRelationship?: string;
+  callerPhone?: string;
+  deceasedName?: string;
+  dateOfBirth?: string;
+  dateOfDeath?: string;
+  timeOfDeath?: string;
+  locationOfDeath?: string;
+  address?: string;
+  nextOfKinName?: string;
+  nextOfKinPhone?: string;
+  weight?: string;
+  readyTime?: string;
+  hasStairs?: string;
+  isFamilyPresent?: string;
+  isVerbalRelease?: boolean;
+}
+
 export interface CaseData {
   id: string;
   caseNumber: string;
@@ -57,6 +76,9 @@ export interface CaseData {
     memorials: CatalogItem[];
   };
   regulatoryInfo?: RegulatoryInfo;
+  isVerbalRelease?: boolean;
+  firstCallData?: FirstCallData;
+  hasRemovalRelease?: boolean;
 }
 
 interface CaseStore {
@@ -77,6 +99,7 @@ interface CaseStore {
   generateCaseNumber: () => string;
   addCase: (caseData: Omit<CaseData, 'id' | 'caseNumber'>) => CaseData;
   getAllCases: () => CaseData[];
+  updateFirstCallData: (caseId: string, firstCallData: FirstCallData) => void;
 }
 
 export const useCaseStore = create<CaseStore>((set, get) => ({
@@ -274,5 +297,17 @@ export const useCaseStore = create<CaseStore>((set, get) => ({
 
   getAllCases: () => {
     return Array.from(get().cases.values());
+  },
+
+  updateFirstCallData: (caseId, firstCallData) => {
+    set((state) => {
+      const newCases = new Map(state.cases);
+      const caseData = newCases.get(caseId);
+      
+      if (!caseData) return state;
+
+      newCases.set(caseId, { ...caseData, firstCallData });
+      return { cases: newCases };
+    });
   },
 }));

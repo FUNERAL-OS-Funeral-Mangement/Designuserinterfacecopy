@@ -5,9 +5,10 @@ import { useState } from 'react';
 interface SendEFaxProps {
   onBack: () => void;
   onCreateCase?: () => void;
+  onBackToDashboard?: () => void;
 }
 
-export function SendEFax({ onBack, onCreateCase }: SendEFaxProps) {
+export function SendEFax({ onBack, onCreateCase, onBackToDashboard }: SendEFaxProps) {
   const { caseData } = useStore();
   const [faxNumber, setFaxNumber] = useState('');
   const [fromName, setFromName] = useState('Lakes Funeral Home');
@@ -54,7 +55,7 @@ export function SendEFax({ onBack, onCreateCase }: SendEFaxProps) {
           </div>
 
           <button
-            onClick={onBack}
+            onClick={onBackToDashboard || onBack}
             className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
           >
             Back to First Call
