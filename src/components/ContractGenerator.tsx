@@ -1,6 +1,7 @@
-import { Download, Send, Printer, X } from 'lucide-react';
+import { Download, Send, Printer, X, FileText, PackageIcon, Edit3, DollarSign, CheckCircle, LockIcon } from 'lucide-react';
 import { useState } from 'react';
-import emmanuelLogo from "figma:asset/995e9f13c0bef55b3c91329b2a17a777ef793705.png";
+import { useStore } from '../store/useStore';
+// import emmanuelLogo from "figma:asset/995e9f13c0bef55b3c91329b2a17a777ef793705.png";
 
 interface ContractGeneratorProps {
   onClose: () => void;
@@ -61,7 +62,7 @@ export function ContractGenerator({ onClose }: ContractGeneratorProps) {
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-40">
                     <img 
-                      src={emmanuelLogo} 
+                      src={'emmanuelLogo'} 
                       alt="Emmanuel Funeral Homes" 
                       className="w-full h-auto object-contain"
                     />
@@ -270,7 +271,7 @@ export function ContractGenerator({ onClose }: ContractGeneratorProps) {
             {/* Sidebar Actions */}
             <div className="lg:w-64 bg-gray-50 border-l border-gray-200 p-4 space-y-2">
               <button className="w-full flex items-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <Lock className="w-5 h-5 text-gray-600" />
+                <LockIcon className="w-5 h-5 text-gray-600" />
                 <span className="text-gray-700">Freeze Statement</span>
               </button>
 

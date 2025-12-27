@@ -1,8 +1,8 @@
 import { useState, useMemo, useRef } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { LogoUpload } from "./LogoUpload";
-import eduardoLogo from "figma:asset/4f4413d53848e948d0d7a0a9be4a11765dd0c149.png";
-import ritePathLogo from "figma:asset/004a81e9bfe8a591307cff80ff24ed76f8e8a0e0.png";
+// import eduardoLogo from "figma:asset/4f4413d53848e948d0d7a0a9be4a11765dd0c149.png";
+// import ritePathLogo from "figma:asset/004a81e9bfe8a591307cff80ff24ed76f8e8a0e0.png";
 import {
   FolderOpen,
   FileText,
@@ -24,6 +24,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useAppointmentStore } from "../store/useAppointmentStore";
+import { ViewType } from "../App";
 
 interface DashboardProps {
   onNavigate: (view: ViewType) => void;
@@ -35,7 +36,7 @@ export function Dashboard({
   onLogout,
 }: DashboardProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [funeralHomeLogo, setFuneralHomeLogo] = useState(eduardoLogo);
+  const [funeralHomeLogo, setFuneralHomeLogo] = useState('eduardoLogo');
   const [funeralHomeName, setFuneralHomeName] = useState("Eduardo Rivero Funeral Home");
   const [funeralHomeTagline, setFuneralHomeTagline] = useState("Serving families with dignity");
   const [isEditingName, setIsEditingName] = useState(false);
@@ -398,7 +399,7 @@ export function Dashboard({
         {/* Sidebar Footer */}
         <div className="flex-shrink-0 pt-4 p-8 border-t border-gray-200 flex items-center justify-center">
           <img
-            src={ritePathLogo}
+            src={'ritePathLogo'}
             alt="RitePath"
             className="h-12 object-contain"
           />
