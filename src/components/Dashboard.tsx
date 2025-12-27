@@ -21,6 +21,7 @@ import {
   Archive,
   Pencil,
   Check,
+  Settings,
 } from "lucide-react";
 import { useAppointmentStore } from "../store/useAppointmentStore";
 
@@ -438,6 +439,16 @@ export function Dashboard({
                 >
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                </button>
+                <button
+                  onClick={() => onNavigate('profile-settings')}
+                  className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors text-sm"
+                  title="Profile Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden lg:inline">
+                    Settings
+                  </span>
                 </button>
                 <button
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors text-sm"

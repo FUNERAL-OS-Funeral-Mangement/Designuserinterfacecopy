@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
-import { ArrowLeft, FileText, Clock, Send, CheckCircle2, Circle } from 'lucide-react';
+import { ArrowLeft, FileText, Clock, Send, CheckCircle2, Circle, ClipboardList } from 'lucide-react';
 import { FirstCallIntakeSection } from './FirstCallIntakeSection';
 import { FirstCallSignaturesSection } from './FirstCallSignaturesSection';
 import { FirstCallFaxingSection } from './FirstCallFaxingSection';
 import { FirstCallCompleteSection } from './FirstCallCompleteSection';
+import { FirstCallSummarySection } from './FirstCallSummarySection';
 import { ActiveCasesDock } from './ActiveCasesDock';
 import { ActiveCasesSidebar } from './ActiveCasesSidebar';
 import { useFirstCallStore } from '../store/useFirstCallStore';
+import { useCaseStore } from '../store/useCaseStore';
 
 interface FirstCallTimelineProps {
   onBack: () => void;
@@ -14,7 +16,7 @@ interface FirstCallTimelineProps {
   caseId?: string;
 }
 
-type TimelineStage = 'intake' | 'signatures' | 'faxing' | 'complete';
+type TimelineStage = 'intake' | 'summary' | 'signatures' | 'faxing' | 'complete';
 
 export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCallTimelineProps) {
   const { 
@@ -24,6 +26,8 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
     getActiveCase,
     switchCase 
   } = useFirstCallStore();
+
+  const { addCase } = useCaseStore();
 
   // Initialize case if needed
   useEffect(() => {
@@ -52,16 +56,35 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
     createCase('', '');
   };
 
-  const stages = [
+  // Dynamic stages based on verbal release
+  const getAllStages = () => [
     { id: 'intake' as TimelineStage, label: 'First Call Intake', icon: FileText },
+    { id: 'summary' as TimelineStage, label: 'Summary', icon: ClipboardList },
     { id: 'signatures' as TimelineStage, label: 'Signatures', icon: Clock },
     { id: 'faxing' as TimelineStage, label: 'Faxing', icon: Send },
     { id: 'complete' as TimelineStage, label: 'Complete', icon: CheckCircle2 },
   ];
 
+  const getVisibleStages = () => {
+    const allStages = getAllStages();
+    
+    // If verbal release, show only: intake → summary → complete
+    if (activeCase.isVerbalRelease) {
+      return allStages.filter(s => ['intake', 'summary', 'complete'].includes(s.id));
+    }
+    
+    // Otherwise show: intake → signatures → faxing → complete (skip summary)
+    return allStages.filter(s => ['intake', 'signatures', 'faxing', 'complete'].includes(s.id));
+  };
+
+  const stages = getVisibleStages();
+
   const handleIntakeComplete = (data: any) => {
+    // Determine next stage based on verbal release
+    const nextStage = data.isVerbalRelease ? 'summary' : 'signatures';
+    
     updateCase(activeCase.id, {
-      currentStage: 'signatures',
+      currentStage: nextStage,
       completedStages: [...activeCase.completedStages, 'intake'],
       intakeComplete: true,
       deceasedName: data.deceasedName || activeCase.deceasedName,
@@ -69,10 +92,37 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
       familyContactName: data.nextOfKinName || data.callerName,
       callerName: data.callerName,
       callerPhone: data.callerPhone,
+      callerRelationship: data.callerRelationship,
       address: data.address,
+      nextOfKinPhone: data.nextOfKinPhone,
+      weight: data.weight,
+      isWeightKnown: data.isWeightKnown,
+      readyForPickup: data.readyForPickup,
+      readyTime: data.readyTime,
+      hasStairs: data.hasStairs,
+      isFamilyPresent: data.isFamilyPresent,
+      isVerbalRelease: data.isVerbalRelease,
+      dateOfBirth: data.dateOfBirth,
+      locationOfPickup: data.locationOfPickup,
       timeOfDeath: data.timeOfDeath,
       signaturesTotal: data.signaturesTotal || 1,
       faxesTotal: data.signaturesTotal || 1,
+    });
+  };
+
+  const handleSendReleaseForm = () => {
+    // Mark summary as complete and move to complete stage
+    updateCase(activeCase.id, {
+      completedStages: [...activeCase.completedStages, 'summary'],
+      currentStage: 'complete',
+    });
+  };
+
+  const handleSummaryComplete = () => {
+    // Complete the case
+    updateCase(activeCase.id, {
+      completedStages: [...activeCase.completedStages, 'summary'],
+      currentStage: 'complete',
     });
   };
 
@@ -94,6 +144,7 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
     const newFaxCount = activeCase.faxesSent + 1;
     const allFaxed = newFaxCount >= activeCase.faxesTotal;
     
+    // Update First Call state
     updateCase(activeCase.id, {
       faxesSent: newFaxCount,
       currentStage: allFaxed ? 'complete' : 'faxing',
@@ -101,6 +152,42 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
         ? [...activeCase.completedStages, 'faxing']
         : activeCase.completedStages,
     });
+
+    // Auto-create case card when all documents are sent
+    if (allFaxed) {
+      const newCase = addCase({
+        deceasedName: activeCase.deceasedName || 'Unknown',
+        caseType: 'At-Need',
+        dateCreated: new Date().toISOString().split('T')[0],
+        isVerbalRelease: activeCase.isVerbalRelease,
+        firstCallData: {
+          callerName: activeCase.callerName,
+          callerRelationship: activeCase.callerRelationship,
+          callerPhone: activeCase.callerPhone,
+          deceasedName: activeCase.deceasedName,
+          dateOfBirth: activeCase.dateOfBirth,
+          dateOfDeath: new Date().toISOString().split('T')[0],
+          timeOfDeath: activeCase.timeOfDeath,
+          locationOfDeath: activeCase.locationOfPickup,
+          address: activeCase.address,
+          nextOfKinName: activeCase.nextOfKinName,
+          nextOfKinPhone: activeCase.nextOfKinPhone,
+          weight: activeCase.weight,
+          readyTime: activeCase.readyTime,
+          hasStairs: activeCase.hasStairs,
+          isFamilyPresent: activeCase.isFamilyPresent,
+          isVerbalRelease: activeCase.isVerbalRelease,
+        },
+        hasRemovalRelease: true,
+        catalogSelections: {
+          package: undefined,
+          addons: [],
+          memorials: [],
+        },
+      });
+
+      console.log('✅ Auto-created case card:', newCase.caseNumber);
+    }
   };
 
   const getStageStatus = (stageId: TimelineStage) => {
@@ -212,6 +299,14 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
             <FirstCallIntakeSection onComplete={handleIntakeComplete} />
           )}
 
+          {activeCase.currentStage === 'summary' && (
+            <FirstCallSummarySection
+              onNavigateToCases={onNavigateToCases}
+              onSendReleaseForm={handleSendReleaseForm}
+              onComplete={handleSummaryComplete}
+            />
+          )}
+
           {activeCase.currentStage === 'signatures' && (
             <FirstCallSignaturesSection 
               signaturesReceived={activeCase.signaturesReceived}
@@ -227,6 +322,9 @@ export function FirstCallTimeline({ onBack, onNavigateToCases, caseId }: FirstCa
               faxesSent={activeCase.faxesSent}
               faxesTotal={activeCase.faxesTotal}
               onFaxSent={handleFaxSent}
+              deceasedName={activeCase.deceasedName}
+              nextOfKinName={activeCase.nextOfKinName}
+              nextOfKinPhone={activeCase.nextOfKinPhone}
             />
           )}
 

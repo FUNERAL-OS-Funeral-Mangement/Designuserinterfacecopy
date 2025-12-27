@@ -13,8 +13,9 @@ import { FamilyCatalogView } from './components/FamilyCatalogView';
 import { Catalogs } from './components/Catalogs';
 import { DocumentLibrary } from './components/DocumentLibrary';
 import { StaffAndVendors } from './components/StaffAndVendors';
+import { ProfileSettings } from './components/ProfileSettings';
 
-export type ViewType = 'landing' | 'dashboard' | 'first-call' | 'first-call-timeline' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog' | 'catalogs' | 'document-library' | 'staff-vendors';
+export type ViewType = 'landing' | 'dashboard' | 'first-call' | 'first-call-timeline' | 'cases' | 'case-detail' | 'appointments' | 'schedule' | 'catalog-link' | 'family-catalog' | 'catalogs' | 'document-library' | 'staff-vendors' | 'profile-settings';
 
 const CLERK_PUBLISHABLE_KEY = 'pk_test_c2V0dGxlZC1kcmFnb24tNC5jbGVyay5hY2NvdW50cy5kZXYk';
 
@@ -126,6 +127,9 @@ function AppContent() {
     
     case 'staff-vendors':
       return <StaffAndVendors onBack={() => setCurrentView('dashboard')} />;
+    
+    case 'profile-settings':
+      return <ProfileSettings onBack={() => setCurrentView('dashboard')} />;
     
     default:
       return <LandingPage onNavigate={setCurrentView} />;

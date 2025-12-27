@@ -9,15 +9,19 @@ interface SendEFaxProps {
 }
 
 export function SendEFax({ onBack, onCreateCase, onBackToDashboard }: SendEFaxProps) {
-  const { caseData } = useStore();
+  const caseData = useStore((state) => state.caseData);
   const [faxNumber, setFaxNumber] = useState('');
-  const [fromName, setFromName] = useState('Lakes Funeral Home');
+  const [fromName, setFromName] = useState('Eduardo Rivero Funeral Home');
   const [toName, setToName] = useState('North Shore Hospital');
   const [message, setMessage] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSendFax = () => {
+    if (!faxNumber) {
+      alert('Please enter a fax number');
+      return;
+    }
     setIsSent(true);
     setTimeout(() => {
       setIsSent(false);
@@ -45,13 +49,15 @@ export function SendEFax({ onBack, onCreateCase, onBackToDashboard }: SendEFaxPr
             <p className="text-gray-600 text-sm mb-4">
               Now that the release form has been sent, you can create a full case to manage arrangements, catalog selections, contracts, and more.
             </p>
-            <button
-              onClick={onCreateCase}
-              className="w-full px-6 py-4 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <FileText className="w-5 h-5" />
-              Create Full Case
-            </button>
+            {onCreateCase && (
+              <button
+                onClick={onCreateCase}
+                className="w-full px-6 py-4 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <FileText className="w-5 h-5" />
+                Create Full Case
+              </button>
+            )}
           </div>
 
           <button

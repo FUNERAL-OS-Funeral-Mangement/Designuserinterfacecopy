@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, ChevronRight, FileText } from 'lucide-react';
+import { CheckCircle2, ChevronRight, FileText, ArrowLeft } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 interface FirstCallIntakeSectionProps {
@@ -8,6 +8,8 @@ interface FirstCallIntakeSectionProps {
 
 export function FirstCallIntakeSection({ onComplete }: FirstCallIntakeSectionProps) {
   const { caseData, updateCaseData } = useStore();
+  
+  const [showReview, setShowReview] = useState(false);
 
   const [callerName, setCallerName] = useState('');
   const [callerRelationship, setCallerRelationship] = useState('');
@@ -54,10 +56,58 @@ export function FirstCallIntakeSection({ onComplete }: FirstCallIntakeSectionPro
     requiredDocs.some(d => d.id === id)
   );
 
+  const formatValue = (value: any) => {
+    if (value === undefined || value === null || value === '') {
+      return 'Not Specified';
+    }
+    return value;
+  };
+
+  const getTeamName = (teamId: string) => {
+    const teams: Record<string, string> = {
+      'team-1': 'Premier Removal Services',
+      'team-2': '24/7 Body Transport Co.',
+      'team-3': 'Guardian Removal Team',
+      'team-4': 'Care Transport Services',
+    };
+    return teams[teamId] || '';
+  };
+
+  const summaryFields = [
+    { label: 'Name of caller', value: callerName },
+    { label: 'Relationship of caller', value: callerRelationship },
+    { label: "Caller's phone", value: callerPhone },
+    { label: 'Name of deceased', value: caseData.deceasedName },
+    { label: 'Date of Birth', value: caseData.dateOfBirth },
+    { label: 'Date of Death', value: caseData.timeOfDeath?.split('T')[0] },
+    { label: 'Time of Death', value: caseData.timeOfDeath?.split('T')[1]?.slice(0, 5) },
+    { label: 'Location of death', value: caseData.locationOfPickup },
+    { label: 'Address', value: address },
+    { label: 'Next of Kin', value: nextOfKinName },
+    { label: 'Next of Kin phone', value: nextOfKinPhone },
+    { label: 'Weight of deceased', value: weight ? `${weight} lbs` : isWeightKnown },
+    { label: 'Ready for pick up?', value: readyForPickup },
+    { label: 'Ready time', value: readyTime },
+    { label: 'Selected removal team', value: selectedRemovalTeam ? getTeamName(selectedRemovalTeam) : '' },
+    { label: 'Notify removal team?', value: notifyRemovalTeam ? 'Yes' : 'No' },
+    { label: 'Has stairs?', value: hasStairs },
+    { label: 'Is family present?', value: isFamilyPresent },
+  ];
+
+  const handleReviewIntake = () => {
+    setShowReview(true);
+  };
+
+  const handleBackToForm = () => {
+    setShowReview(false);
+  };
+
   const handleComplete = () => {
     // Save data to store
     onComplete({
       deceasedName: caseData.deceasedName,
+      dateOfBirth: caseData.dateOfBirth,
+      locationOfPickup: caseData.locationOfPickup,
       nextOfKinName,
       callerName,
       callerRelationship,
@@ -77,10 +127,150 @@ export function FirstCallIntakeSection({ onComplete }: FirstCallIntakeSectionPro
     });
   };
 
+  // Review View
+  if (showReview) {
+    return (
+      <div className="bg-white border border-gray-200 p-4 md:p-8">
+        {/* Section Header */}
+        <div className="mb-4 md:mb-6 pb-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 text-white flex items-center justify-center text-sm">1</div>
+              <h2 className="text-gray-900">Review First Call Intake</h2>
+            </div>
+            <button
+              onClick={handleBackToForm}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors self-start sm:self-auto"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">Edit intake</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-6 max-w-4xl">
+          {/* First Call Information Summary - Responsive Grid */}
+          <div className="bg-white border border-gray-200 p-4 md:p-6">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div>
+                <h3 className="text-gray-900">First Call Information</h3>
+                <p className="text-sm text-gray-600">Summary of the initial report.</p>
+              </div>
+              {isVerbalRelease && (
+                <div className="px-3 md:px-4 py-2 bg-blue-600 text-white text-xs md:text-sm self-start">
+                  VERBAL RELEASE
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 md:gap-y-2">
+              {summaryFields.map((field, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between py-2 border-b md:border-b-0 border-gray-100"
+                >
+                  <span className="text-sm text-gray-700">{field.label}</span>
+                  <span className={`text-sm text-right ml-4 ${
+                    formatValue(field.value) === 'Not Specified' 
+                      ? 'text-blue-600' 
+                      : 'text-gray-900'
+                  }`}>
+                    {formatValue(field.value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Generate Documents Section - Hidden when verbal release */}
+          {!isVerbalRelease && (
+            <div>
+              <div className="mb-4">
+                <h3 className="text-gray-900">Generate Documents</h3>
+                <p className="text-sm text-gray-600">
+                  Select the documents needed for this case. Required documents are pre-selected.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {documents.map((doc) => {
+                  const isSelected = selectedDocuments.includes(doc.id);
+                  const isRequired = doc.required;
+
+                  return (
+                    <div
+                      key={doc.id}
+                      className={`border p-4 transition-colors ${
+                        isSelected && isRequired
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => !isRequired && toggleDocument(doc.id)}
+                          disabled={isRequired}
+                          className="mt-0.5 w-4 h-4 border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-gray-900">{doc.name}</span>
+                            {isRequired && (
+                              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs">
+                                Required
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
+                        </div>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Document Summary */}
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 flex items-center justify-between">
+                <div className="text-xs text-blue-600">
+                  <span>{selectedDocuments.length} document{selectedDocuments.length === 1 ? '' : 's'} selected</span>
+                  <span className="mx-2">•</span>
+                  <span>{selectedRequiredDocs.length}/{requiredDocs.length} required documents included</span>
+                </div>
+                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+              </div>
+
+              {/* What happens next - Documents */}
+              <div className="mt-3 p-3 bg-amber-50 border border-amber-200">
+                <p className="text-xs text-gray-900 mb-1">✨ What happens next</p>
+                <p className="text-xs text-gray-600">
+                  Documents will be auto-filled with intake data and sent to the next of kin for signature. Most families complete signatures within 15-30 minutes.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Complete Button */}
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={handleComplete}
+              className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <FileText className="w-5 h-5" />
+              <span>{isVerbalRelease ? 'Continue to Summary' : 'Generate & Send for Signature'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white border border-gray-200 p-8">
+    <div className="bg-white border border-gray-200 p-4 md:p-8">
       {/* Section Header */}
-      <div className="mb-8 pb-6 border-b border-gray-200">
+      <div className="mb-6 md:mb-8 pb-4 md:pb-6 border-b border-gray-200">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-blue-600 text-white flex items-center justify-center text-sm">1</div>
           <h2 className="text-gray-900">First Call Intake</h2>
@@ -90,7 +280,7 @@ export function FirstCallIntakeSection({ onComplete }: FirstCallIntakeSectionPro
         </p>
       </div>
 
-      <div className="space-y-8 max-w-2xl">
+      <div className="space-y-6 md:space-y-8 max-w-2xl">
         {/* Caller Information */}
         <div>
           <h3 className="text-gray-900 mb-4">Caller Information</h3>
@@ -447,92 +637,94 @@ export function FirstCallIntakeSection({ onComplete }: FirstCallIntakeSectionPro
             {isVerbalRelease && (
               <div className="mt-3 pt-3 border-t border-blue-200">
                 <p className="text-xs text-blue-700">
-                  ✓ Signature step will be skipped. Case marked as verbal release.
+                  ✓ Document generation and signature steps will be skipped. You'll proceed directly to the summary.
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Generate Documents Section */}
-        <div className="pt-6 border-t border-gray-200">
-          <div className="mb-6">
-            <h2 className="text-gray-900 mb-3">Generate Documents</h2>
-            <p className="text-gray-600">
-              Select the documents needed for this case. Required documents are pre-selected.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {documents.map((doc) => {
-              const isSelected = selectedDocuments.includes(doc.id);
-              const isRequired = doc.required;
-
-              return (
-                <div
-                  key={doc.id}
-                  className={`border p-4 transition-colors ${
-                    isSelected && isRequired
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-white border-gray-200'
-                  }`}
-                >
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => !isRequired && toggleDocument(doc.id)}
-                      disabled={isRequired}
-                      className="mt-0.5 w-5 h-5 border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-blue-600" />
-                        <span className="text-gray-900">{doc.name}</span>
-                        {isRequired && (
-                          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs">
-                            Required
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
-                    </div>
-                  </label>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Document Summary */}
-          <div className="mt-4 p-4 bg-gray-50 border border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-blue-600">
-              <span>{selectedDocuments.length} document{selectedDocuments.length === 1 ? '' : 's'} selected</span>
-              <span className="mx-2">•</span>
-              <span>{selectedRequiredDocs.length}/{requiredDocs.length} required documents included</span>
+        {/* Generate Documents Section - Hidden when verbal release */}
+        {!isVerbalRelease && (
+          <div className="pt-6 border-t border-gray-200">
+            <div className="mb-6">
+              <h2 className="text-gray-900 mb-3">Generate Documents</h2>
+              <p className="text-gray-600">
+                Select the documents needed for this case. Required documents are pre-selected.
+              </p>
             </div>
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
-          </div>
 
-          {/* What happens next - Documents */}
-          <div className="mt-4 p-4 bg-amber-50 border border-amber-200">
-            <p className="text-sm text-gray-900 mb-2">✨ What happens next</p>
-            <p className="text-sm text-gray-600 mb-2">
-              Documents will be auto-filled with intake data and sent to the next of kin for signature.
-            </p>
-            <p className="text-sm text-gray-600">
-              Most families complete signatures within 15-30 minutes.
-            </p>
+            <div className="space-y-3">
+              {documents.map((doc) => {
+                const isSelected = selectedDocuments.includes(doc.id);
+                const isRequired = doc.required;
+
+                return (
+                  <div
+                    key={doc.id}
+                    className={`border p-4 transition-colors ${
+                      isSelected && isRequired
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => !isRequired && toggleDocument(doc.id)}
+                        disabled={isRequired}
+                        className="mt-0.5 w-5 h-5 border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          <span className="text-gray-900">{doc.name}</span>
+                          {isRequired && (
+                            <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs">
+                              Required
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+                      </div>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Document Summary */}
+            <div className="mt-4 p-4 bg-gray-50 border border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-blue-600">
+                <span>{selectedDocuments.length} document{selectedDocuments.length === 1 ? '' : 's'} selected</span>
+                <span className="mx-2">•</span>
+                <span>{selectedRequiredDocs.length}/{requiredDocs.length} required documents included</span>
+              </div>
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+            </div>
+
+            {/* What happens next - Documents */}
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200">
+              <p className="text-sm text-gray-900 mb-2">✨ What happens next</p>
+              <p className="text-sm text-gray-600 mb-2">
+                Documents will be auto-filled with intake data and sent to the next of kin for signature.
+              </p>
+              <p className="text-sm text-gray-600">
+                Most families complete signatures within 15-30 minutes.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Complete Button */}
         <div className="pt-6">
           <button
-            onClick={handleComplete}
+            onClick={handleReviewIntake}
             className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
           >
             <FileText className="w-5 h-5" />
-            <span>Generate & Send for Signature</span>
+            <span>{isVerbalRelease ? 'Continue to Summary' : 'Generate & Send for Signature'}</span>
           </button>
         </div>
       </div>

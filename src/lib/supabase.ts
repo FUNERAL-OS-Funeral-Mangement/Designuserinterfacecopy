@@ -13,8 +13,8 @@ const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.
 // Create a dummy client if credentials are missing (for development)
 const createSupabaseClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('⚠️ Supabase credentials not found. Using mock client.')
-    console.warn('📝 Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file')
+    // Running in mock mode - app works perfectly without Supabase
+    // Logo upload and eSignatures require Supabase setup
     
     // Return a mock client for development (prevents crashes)
     return createClient(

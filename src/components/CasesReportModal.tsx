@@ -22,22 +22,33 @@ type DateFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
 type CaseTypeFilter = 'all' | 'At-Need' | 'Pre-Need';
 
 // Mock additional case data - in production, this would come from your backend
-const getCaseReportData = (caseId: string, deceasedName: string, dateCreated: string) => ({
-  dateReceived: dateCreated,
-  dateOfDeath: 'May 28, 2023',
-  embalmerName: 'Michael Rodriguez',
-  embalmerLicense: 'FL-EMB-4521',
-  methodOfDisposal: 'Sea Scattering of Ashes',
-  countyOfDeath: 'Miami-Dade County',
-  burialTransitNumber: `BTN-2023-FL-${caseId.split('-')[1]}`,
-  directorInCharge: 'Sarah Mitchell',
-  directorLicense: 'FL-FD-3301',
-  directorSignature: 'Sarah L. Mitchell',
-  signatureDate: dateCreated,
-  placeOfDeath: 'Jackson Memorial Hospital',
-  timeOfDeath: '3:45 PM',
-  certificateNumber: `DC-2023-${caseId.split('-')[1]}`,
-});
+const getCaseReportData = (caseId: string, deceasedName: string, dateCreated: string) => {
+  // Safely extract case ID number with fallback
+  const getCaseIdNumber = () => {
+    if (!caseId) return '000001';
+    const parts = caseId.split('-');
+    return parts.length > 1 ? parts[1] : caseId.replace(/[^0-9]/g, '') || '000001';
+  };
+  
+  const caseIdNumber = getCaseIdNumber();
+  
+  return {
+    dateReceived: dateCreated,
+    dateOfDeath: 'May 28, 2023',
+    embalmerName: 'Michael Rodriguez',
+    embalmerLicense: 'FL-EMB-4521',
+    methodOfDisposal: 'Sea Scattering of Ashes',
+    countyOfDeath: 'Miami-Dade County',
+    burialTransitNumber: `BTN-2023-FL-${caseIdNumber}`,
+    directorInCharge: 'Sarah Mitchell',
+    directorLicense: 'FL-FD-3301',
+    directorSignature: 'Sarah L. Mitchell',
+    signatureDate: dateCreated,
+    placeOfDeath: 'Jackson Memorial Hospital',
+    timeOfDeath: '3:45 PM',
+    certificateNumber: `DC-2023-${caseIdNumber}`,
+  };
+};
 
 export function CasesReportModal({ show, onClose, cases }: CasesReportModalProps) {
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
@@ -60,6 +71,11 @@ export function CasesReportModal({ show, onClose, cases }: CasesReportModalProps
 
   // Filter cases
   const filteredCases = cases.filter((caseData) => {
+    // Skip invalid cases
+    if (!caseData || !caseData.caseId || !caseData.deceasedName) {
+      return false;
+    }
+    
     if (caseTypeFilter !== 'all' && caseData.caseType !== caseTypeFilter) {
       return false;
     }
