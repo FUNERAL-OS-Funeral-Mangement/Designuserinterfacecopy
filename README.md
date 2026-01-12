@@ -15,13 +15,13 @@ A modern, mobile-first funeral home application that unifies all critical workfl
 
 ## Tech Stack
 
-- **Frontend:** React + Vite + TypeScript
+- **Frontend:** Next.js 14 (App Router) + React + TypeScript
 - **Styling:** Tailwind CSS 4.0
 - **State Management:** Zustand
 - **Authentication:** Clerk
 - **Icons:** Lucide React
-- **Backend:** Django (separate repository)
-- **Database:** AWS
+- **Backend:** Next.js API Routes + Supabase
+- **Database:** Supabase (PostgreSQL)
 
 ## Design System
 
@@ -55,9 +55,11 @@ Inspired by premium product companies like Linear, Stripe, and Notion.
    npm install
    ```
 
-3. **Install Clerk React SDK**
+3. **Configure Environment Variables** ⚠️ **REQUIRED**
+   
+   Copy the example environment file:
    ```bash
-   npm install @clerk/clerk-react@latest
+   copy .env.example .env.local
    ```
 
 4. **Configure Clerk Authentication** ⚠️ **REQUIRED**
@@ -73,21 +75,27 @@ Inspired by premium product companies like Linear, Stripe, and Notion.
    
    d. Update `.env.local` file:
       ```env
-      VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_actual_key_here
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_actual_key_here
+      CLERK_SECRET_KEY=sk_test_your_secret_key_here
       ```
       
    **Important:** Replace the placeholder key with your actual key from Clerk!
 
-5. **Start the development server**
+5. **Run Database Migration** (if using Supabase)
+   ```bash
+   npm run db:push
+   ```
+
+6. **Start the development server**
    ```bash
    npm run dev
    ```
    
-   **Note:** If you see a "Clerk Configuration Required" screen, it means you need to add your Clerk key to `.env.local`
+   **Note:** If you see a "Clerk Configuration Required" screen, it means you need to add your Clerk keys to `.env.local`
 
-6. **Open your browser**
+7. **Open your browser**
    
-   Navigate to `http://localhost:5173` (or the port shown in your terminal)
+   Navigate to `http://localhost:3000`
 
 ## Authentication
 
@@ -104,9 +112,11 @@ See [CLERK_SETUP.md](./CLERK_SETUP.md) for detailed setup instructions.
 
 ```
 /
-├── main.tsx                    # Entry point with ClerkProvider
-├── App.tsx                     # Main app with routing logic
-├── index.html                  # HTML entry point
+├── app/                        # Next.js App Router
+│   ├── layout.tsx              # Root layout with ClerkProvider
+│   ├── page.tsx                # Landing page
+│   ├── (dashboard)/            # Protected dashboard routes
+│   └── api/                    # API routes
 ├── components/                 # React components
 │   ├── Dashboard.tsx           # Main dashboard
 │   ├── FirstCall.tsx           # First call workflow
@@ -123,7 +133,11 @@ See [CLERK_SETUP.md](./CLERK_SETUP.md) for detailed setup instructions.
 │   └── useAppointmentStore.ts  # Appointments store
 ├── styles/                     # Global styles
 │   └── globals.css             # Tailwind + custom CSS
+├── lib/                        # Utility libraries
+│   └── supabase.ts             # Supabase client
 ├── .env.local                  # Environment variables (gitignored)
+├── next.config.js              # Next.js configuration
+├── middleware.ts               # Clerk auth middleware
 └── .gitignore                  # Git ignore rules
 ```
 
@@ -186,7 +200,11 @@ npm run lint         # Run ESLint
 
 Required environment variables:
 
-- `VITE_CLERK_PUBLISHABLE_KEY` - Clerk authentication key
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
+- `CLERK_SECRET_KEY` - Clerk secret key
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (server-side only)
 
 **Security Note:** Never commit `.env.local` to version control. It's automatically ignored via `.gitignore`.
 
@@ -215,4 +233,4 @@ For support, contact [your-email@example.com]
 
 ---
 
-**Note:** This application was migrated from Supabase to Clerk authentication for improved user experience and reduced authentication boilerplate.
+**Note:** This application uses Next.js 14 App Router with Clerk for authentication and Supabase for the database backend, providing a production-grade SaaS architecture with full multi-tenancy support.
