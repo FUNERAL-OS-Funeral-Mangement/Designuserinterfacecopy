@@ -1,9 +1,10 @@
-'use client';
-import { WeeklySchedule } from '@/components/WeeklySchedule';
-import { useRouter } from 'next/navigation';
+import { ScheduleClient } from '@/components/ScheduleClient';
+import { Metadata } from 'next';
 
-export default function SchedulePage() {
-  const router = useRouter();
+export const metadata: Metadata = {
+  title: 'Schedule',
+}
 
-  return <WeeklySchedule onBack={() => router.push('/dashboard')} />;
+export default async function SchedulePage() {
+  return <ScheduleClient />;
 }

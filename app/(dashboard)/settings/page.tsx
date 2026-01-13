@@ -1,6 +1,11 @@
 import { SettingsClient } from '@/components/SettingsClient';
+import { Metadata } from 'next';
 
-export default function SettingsPage() {
+export const metadata: Metadata = {
+  title: 'Settings',
+}
+
+export default async function SettingsPage() {
   return <SettingsClient />;
 }
 

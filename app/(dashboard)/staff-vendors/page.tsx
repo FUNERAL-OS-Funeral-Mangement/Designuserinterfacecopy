@@ -1,6 +1,6 @@
 import { StaffVendorsClient } from '@/components/StaffVendorsClient';
 
-export default function StaffVendorsPage() {
+export default async function StaffVendorsPage() {
   return <StaffVendorsClient />;
 }
 

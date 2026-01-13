@@ -1,6 +1,11 @@
 import { AppointmentsClient } from '@/components/AppointmentsClient';
+import { Metadata } from 'next';
 
-export default function AppointmentsPage() {
+export const metadata: Metadata = {
+  title: 'Appointments',
+}
+
+export default async function AppointmentsPage() {
   return <AppointmentsClient />;
 }
 

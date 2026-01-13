@@ -1,6 +1,11 @@
 import { FirstCallClient } from '@/components/FirstCallClient';
+import { Metadata } from 'next';
 
-export default function FirstCallPage() {
+export const metadata: Metadata = {
+  title: 'First Call',
+}
+
+export default async function FirstCallPage() {
   return <FirstCallClient />;
 }
 

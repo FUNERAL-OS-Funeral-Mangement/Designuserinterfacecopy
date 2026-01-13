@@ -1,6 +1,11 @@
 import { CatalogsClient } from '@/components/CatalogsClient';
+import { Metadata } from 'next';
 
-export default function CatalogsPage() {
+export const metadata: Metadata = {
+  title: 'Catalogs',
+}
+
+export default async function CatalogsPage() {
   return <CatalogsClient />;
 }
 
