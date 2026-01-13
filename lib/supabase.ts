@@ -28,9 +28,9 @@ const createSupabaseClient = () => {
 
 export const supabase = createSupabaseClient()
 
-// Server-side admin client (use only in API routes/server components)
-// Import from dedicated file to keep separation of concerns
-export { supabaseAdmin } from './supabaseAdmin'
+// ⚠️ IMPORTANT: supabaseAdmin is NOT exported here to prevent client-side bundling
+// Server-side code should import directly: import { supabaseAdmin } from '@/lib/supabaseAdmin'
+// Client components should use: import { supabase } from '@/lib/supabase' or '@/lib/supabase-browser'
 
 // =====================================================
 // TYPE DEFINITIONS

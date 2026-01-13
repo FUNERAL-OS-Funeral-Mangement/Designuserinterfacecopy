@@ -24,10 +24,9 @@ import {
   Settings,
 } from "lucide-react";
 import { useAppointmentStore } from "../store/useAppointmentStore";
-import { ViewType } from "../App";
 
 interface DashboardProps {
-  onNavigate: (view: ViewType) => void;
+  onNavigate: (view: any) => void;
   onLogout: () => void;
 }
 
@@ -140,28 +139,28 @@ export function Dashboard({
       icon: Phone,
       label: "First Call Intake",
       description: "Start new case intake",
-      view: "first-call-timeline" as ViewType,
+      view: "first-call" as any,
       iconBg: "bg-purple-600",
     },
     {
       icon: FolderOpen,
       label: "Cases Management",
       description: "View or Update Cases",
-      view: "cases" as ViewType,
+      view: "cases" as any,
       iconBg: "bg-blue-600",
     },
     {
       icon: Users,
       label: "Appointments & Arrangements",
       description: "Schedule family meetings",
-      view: "appointments" as ViewType,
+      view: "appointments" as any,
       iconBg: "bg-teal-600",
     },
     {
       icon: Calendar,
       label: "Weekly Service Schedule",
       description: "See all upcoming services",
-      view: "schedule" as ViewType,
+      view: "schedule" as any,
       iconBg: "bg-indigo-600",
     },
   ];
@@ -356,7 +355,7 @@ export function Dashboard({
               
               {/* Document Library */}
               <button
-                onClick={() => onNavigate('document-library')}
+                onClick={() => onNavigate('documents')}
                 className="w-full bg-white border border-gray-200 rounded-xl p-3.5 text-left hover:border-blue-300 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
               >
                 <div className="flex items-center gap-3">

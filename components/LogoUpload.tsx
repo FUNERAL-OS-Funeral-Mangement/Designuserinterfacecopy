@@ -76,7 +76,7 @@ export function LogoUpload({
 
     try {
       // Check if Supabase is configured
-      const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       if (!supabaseUrl || supabaseUrl === '') {
         console.warn('⚠️ Supabase not configured. Logo upload disabled.');
         alert('Logo upload is not configured yet. Please set up Supabase to enable this feature.');
@@ -162,7 +162,7 @@ export function LogoUpload({
     setIsEditingName(false);
     
     // Update in database if Supabase is configured
-    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (supabaseUrl && supabaseUrl !== '' && orgId) {
       try {
         const { error } = await supabase
@@ -199,7 +199,7 @@ export function LogoUpload({
   };
 
   const displayLogo = previewUrl || currentLogo;
-
+  console.log('displayLogo', displayLogo, 'currentLogo', currentLogo);
   return (
     <div className="relative z-10">
       <div
