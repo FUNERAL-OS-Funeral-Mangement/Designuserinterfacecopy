@@ -99,7 +99,7 @@ Inspired by premium product companies like Linear, Stripe, and Notion.
 
 ## Authentication
 
-This app uses [Clerk](https://clerk.com/) for authentication, providing:
+This app uses [SupaBase) for authentication, providing:
 
 - **Pre-built UI:** Professional sign-in/sign-up modals
 - **Social Login:** Support for Google, GitHub, and more
