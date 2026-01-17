@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: 'Schedule',
 }
 
-export default async function SchedulePage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default function SchedulePage() {
   return <ScheduleClient />;
 }

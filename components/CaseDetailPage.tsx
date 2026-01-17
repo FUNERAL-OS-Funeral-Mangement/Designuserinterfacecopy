@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, User, FileText, DollarSign, Image as ImageIcon, Info, MapPin, Landmark, ShoppingBag, AlertCircle, Users, Camera, BarChart3, Edit2, Check, X } from 'lucide-react';
+import { User, FileText, DollarSign, Image as ImageIcon, Info, MapPin, Landmark, ShoppingBag, AlertCircle, Users, Camera, BarChart3, Edit2, Check, X } from 'lucide-react';
 import { DocumentsTab } from './case-tabs/DocumentsTab';
 import { PaymentsTab } from './case-tabs/PaymentsTab';
 import { MemorialsTab } from './case-tabs/MemorialsTab';
@@ -103,21 +103,12 @@ export function CaseDetailPage({
   const completionPercentage = Math.round((completedCount / totalCount) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm">Back to Cases</span>
-            </button>
-            
+    <>
+      <div className="bg-gray-50">
+        <div className="bg-white border-b border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
             {/* Editable Case Number */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-center">
               {isEditingCaseNumber ? (
                 <>
                   <input
@@ -159,10 +150,9 @@ export function CaseDetailPage({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content Area */}
-      <div className="px-4 sm:px-6 lg:px-8 py-8 pb-12">
+        {/* Main Content Area */}
+        <div className="px-4 sm:px-6 lg:px-8 py-8 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="lg:col-span-3">
@@ -274,7 +264,8 @@ export function CaseDetailPage({
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

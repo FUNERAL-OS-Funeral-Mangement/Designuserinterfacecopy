@@ -49,7 +49,6 @@ export function SignupForm() {
       // If email confirmation is disabled, redirect immediately
       if (data.session) {
         router.push('/dashboard');
-        router.refresh();
       }
     } catch (error: any) {
       setError(error.message || 'Failed to sign up');

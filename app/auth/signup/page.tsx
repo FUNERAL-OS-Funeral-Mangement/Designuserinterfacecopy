@@ -1,4 +1,11 @@
 import { SignupForm } from '@/components/auth/SignupForm';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign Up',
+}
+
+export const dynamic = 'force-dynamic';
 
 export default function SignupPage() {
   return (

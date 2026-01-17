@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { CalendlyModal } from './CalendlyModal';
+import { UserProfileDropdown } from './UserProfileDropdown';
+import { DashboardButton } from './shared/DashboardButton';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import {
   Menu,
   X,
@@ -15,6 +20,8 @@ import {
   Users,
   Star,
   ListChecks,
+  Eye,
+  Bell,
 } from "lucide-react";
 
 type NavItem = { label: string; href?: string };
@@ -92,6 +99,47 @@ function SectionHeading({
 
 export function LandingPageClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
+  const router = useRouter();
+  
+  // DRY: Calendly URL constant
+  const CALENDLY_URL = 'https://calendly.com/ritepath/30min';
+
+  // DRY: Reusable user profile hook
+  const { userProfile, isAuthenticated, isLoading } = useUserProfile();
+
+  // DRY: Reusable View Demo button component
+  const ViewDemoButton = ({ className = "", onClick }: { className?: string; onClick?: () => void }) => {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 px-6 py-3 text-base text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg hover:shadow-lg transition-all duration-200 font-medium",
+          className
+        )}
+      >
+        <span>View Demo</span>
+        <Eye className="w-4 h-4" />
+      </button>
+    );
+  };
+
+
+  // DRY: Reusable auth buttons component (renders appropriate buttons based on auth state)
+  const AuthButtons = ({ className = "" }: { className?: string }) => {
+    if (isLoading) return null;
+    
+    if (isAuthenticated && userProfile) {
+      return (
+        <div className={cn("flex items-center gap-3", className)}>
+          <DashboardButton className="" />
+          <UserProfileDropdown userProfile={userProfile} />
+        </div>
+      );
+    }
+    
+    return <ViewDemoButton className={className} onClick={() => setIsCalendlyOpen(true)} />;
+  };
 
   // Content in one place (easy to tweak, short component)
   const content = {
@@ -290,7 +338,7 @@ export function LandingPageClient() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50 py-4 sm:py-6">
+      <header className="sticky top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm py-4 sm:py-6 border-b border-gray-200 shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -328,13 +376,18 @@ export function LandingPageClient() {
               ))}
             </nav>
 
-            {/* CTA */}
-            <div className="relative hidden md:inline-flex group">
-              <Link href="/auth/login">
-                <button className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all">
-                  Sign In
+            {/* CTA / User Profile */}
+            <div className="relative hidden md:inline-flex items-center gap-3 group">
+              {isAuthenticated && (
+                <button
+                  className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                 </button>
-              </Link>
+              )}
+              <AuthButtons />
             </div>
           </div>
 
@@ -351,11 +404,7 @@ export function LandingPageClient() {
                     {item.label}
                   </a>
                 ))}
-                <Link href="/auth/login">
-                  <button className="inline-flex items-center justify-center w-full px-6 py-3 text-base text-white bg-slate-600 rounded-full hover:bg-slate-700 hover:shadow-lg transition-all">
-                    Sign In
-                  </button>
-                </Link>
+                <AuthButtons className="flex-col w-full gap-3" />
               </div>
             </nav>
           )}
@@ -396,11 +445,9 @@ export function LandingPageClient() {
 
               <div className="mt-10">
                 <div className="flex flex-wrap gap-4">
-                  <Link href="/auth/login">
-                    <PrimaryButton>Sign In →</PrimaryButton>
-                  </Link>
-                  <SecondaryButton>Contact Us</SecondaryButton>
-                </div>
+                  <ViewDemoButton onClick={() => setIsCalendlyOpen(true)} />
+                
+                </div> 
 
                 <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-6">
                   <div className="flex items-center gap-3">
@@ -676,11 +723,7 @@ export function LandingPageClient() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/auth/login">
-              <button className="inline-flex items-center justify-center px-8 py-4 text-base text-slate-700 bg-white rounded-full hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-200">
-                Sign In →
-              </button>
-            </Link>
+            <ViewDemoButton className="px-8 py-4 rounded-full hover:scale-105" onClick={() => setIsCalendlyOpen(true)} />
             <button className="inline-flex items-center justify-center px-8 py-4 text-base text-white bg-white/10 border-2 border-white/30 rounded-full hover:bg-white/20 hover:shadow-xl hover:scale-105 transition-all duration-200 backdrop-blur-sm">
               Schedule Demo
             </button>
@@ -745,6 +788,13 @@ export function LandingPageClient() {
           </div>
         </div>
       </footer>
+
+      {/* Calendly Modal */}
+      <CalendlyModal
+        isOpen={isCalendlyOpen}
+        onClose={() => setIsCalendlyOpen(false)}
+        url={CALENDLY_URL}
+      />
     </div>
   );
 }

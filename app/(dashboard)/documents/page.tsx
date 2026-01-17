@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: 'Documents',
 }
 
-export default async function DocumentsPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default function DocumentsPage() {
   return <DocumentsClient />;
 }
 

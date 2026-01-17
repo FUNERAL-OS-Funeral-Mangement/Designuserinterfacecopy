@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ArrowLeft, Plus, BarChart3 } from 'lucide-react';
+import { Search, Plus, BarChart3 } from 'lucide-react';
 import { CaseCard } from './CaseCard';
 import { useCaseStore } from '../store/useCaseStore';
 import { CasesReportModal } from './CasesReportModal';
@@ -345,18 +345,9 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-50">
+    <>
+      <div className="bg-white">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6 sm:mb-8"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-          
           {/* Desktop: Single Row Layout */}
           <div className="hidden lg:flex lg:items-center lg:gap-6 mb-8">
             <div className="flex-shrink-0">
@@ -505,6 +496,6 @@ export function AllCases({ onBack, onCreateCase, onCaseClick }: AllCasesProps) {
         onClose={() => setShowReportModal(false)} 
         cases={storeCases}
       />
-    </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User } from 'lucide-react';
 import { useAppointmentStore } from '../store/useAppointmentStore';
 
 interface AppointmentsProps {
@@ -29,20 +29,10 @@ export function Appointments({ onBack }: AppointmentsProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <button
-          onClick={onBack}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6 text-gray-700" />
-        </button>
-        <h2 className="text-gray-900">Appointments</h2>
-      </div>
-
+    <>
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="bg-gray-50 min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 py-6">
         {appointments.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -79,7 +69,8 @@ export function Appointments({ onBack }: AppointmentsProps) {
             ))}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

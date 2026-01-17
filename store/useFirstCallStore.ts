@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { FirstCallCase, getStatusFromStage } from '../types/firstCall';
+import { getStatusFromStage } from '../types/firstCall';
 
 export interface FirstCallCase {
   id: string;

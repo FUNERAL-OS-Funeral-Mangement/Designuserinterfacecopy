@@ -1,3 +1,6 @@
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { DashboardHeader } from '@/components/DashboardHeader';
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -5,8 +8,12 @@ export default async function DashboardLayout({
 }) {
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {children}
+    <div className="min-h-screen bg-gray-50 flex">
+      <DashboardSidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <DashboardHeader />
+        {children}
+      </div>
     </div>
   );
 }

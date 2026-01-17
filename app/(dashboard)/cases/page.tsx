@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: 'Cases',
 }
 
-export default async function CasesPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default function CasesPage() {
   return <CasesClient />;
 }
 

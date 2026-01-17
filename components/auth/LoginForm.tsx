@@ -28,7 +28,6 @@ export function LoginForm() {
       if (error) throw error;
 
       router.push('/dashboard');
-      router.refresh();
     } catch (error: any) {
       setError(error.message || 'Failed to sign in');
     } finally {

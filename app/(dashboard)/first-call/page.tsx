@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: 'First Call',
 }
 
-export default async function FirstCallPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default function FirstCallPage() {
   return <FirstCallClient />;
 }
 
