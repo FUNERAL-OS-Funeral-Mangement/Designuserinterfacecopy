@@ -1,0 +1,158 @@
+# RitePath - Cursor Rules
+
+## Code Style & Principles
+
+### DRY (Don't Repeat Yourself)
+- Always extract reusable code into shared components, hooks, or utilities
+- Centralize configuration and constants
+- Use shared components for repeated UI patterns (buttons, modals, etc.)
+- Create reusable hooks for common data fetching patterns
+
+### Code Quality
+- Use early returns for better readability
+- Always use Tailwind classes for styling (avoid inline CSS or style tags)
+- Use descriptive variable and function names
+- Event handlers should be prefixed with "handle" (e.g., `handleClick`, `handleSubmit`)
+- Use `const` instead of `function` declarations for components and utilities
+- Define TypeScript types/interfaces when possible
+
+## React/Next.js Guidelines
+
+### Component Structure
+- Use TypeScript for all components
+- Server Components by default (use 'use client' only when needed)
+- Keep components focused and single-purpose
+- Extract sub-components when logic becomes complex
+
+### Performance
+- Use `useMemo` and `useCallback` for expensive computations
+- Implement proper route segment config for optimization
+- Avoid unnecessary `router.refresh()` calls
+- Cache Supabase clients to prevent recreation
+
+### State Management
+- Use Zustand stores for **client-side UI state only** (e.g., UI toggles, temporary form state)
+- **Do NOT use stores for data fetched from database** - fetch data in Server Components via `serverFunctions.ts`
+- Server Components fetch from database → pass as props → Client Components display data
+- Keep store logic centralized
+- Avoid prop drilling - use stores for UI state, props for data
+
+### Form Management
+- **Always use React Hook Form** (`react-hook-form`) for form handling and validation
+- Use `useForm` hook with validation rules
+- Create reusable `DynamicInput` component that accepts different field configurations
+- Use `register()` for form fields and `formState: { errors }` for error handling
+- Validate fields using React Hook Form's built-in validation or custom validators
+
+## Styling Guidelines
+
+### Tailwind CSS
+- Always use Tailwind utility classes for styling
+- Use `cn()` utility for conditional class names
+- Responsive design: mobile-first approach
+- Use consistent spacing and sizing scales
+
+### Accessibility
+- Add proper ARIA labels where needed
+- Ensure keyboard navigation works
+- Use semantic HTML elements
+
+## File Organization
+
+### Component Files
+- One component per file (or related components together)
+- Export components as named exports
+- Place shared/reusable components in `components/shared/`
+- Custom hooks in `hooks/` directory
+
+### Server Functions Pattern
+- Create `serverFunctions.ts` file alongside each `page.tsx` that needs database access
+- Keep server-side logic separate from page components
+- Export async functions that fetch/update data from database
+- Example: `app/(dashboard)/cases/[caseId]/serverFunctions.ts` alongside `page.tsx`
+
+### Type Definitions
+- Define types close to where they're used
+- Use interfaces for object shapes
+- Export shared types from centralized type files when reused
+
+## API & Data Fetching
+
+### Server-Side Data Fetching Pattern
+- **Always fetch data from database in Server Components, not from Zustand stores**
+- Create `serverFunctions.ts` file alongside `page.tsx` for each route that needs data
+- Server functions should query Supabase/Nest.js API directly
+- Server Components (`page.tsx`) should call server functions and pass data to Client Components as props
+- Client Components should receive data as props, not fetch from stores or database
+- Use this pattern: `page.tsx` (Server) → `serverFunctions.ts` → Database → Pass data → `ClientComponent.tsx`
+
+### Next.js API Routes & Nest.js
+- Place Next.js API routes in `app/api/` for simple endpoints
+- Use Nest.js backend for complex API calls and business logic
+- The architecture uses **Next.js for frontend** and **Nest.js for stronger API calls**
+- Handle errors properly with try-catch
+- Return appropriate HTTP status codes
+
+### Supabase
+- Use `createClient()` from `lib/supabase-browser.ts` for client-side
+- Use server-side clients for API routes when needed
+- Always handle authentication state properly
+- Query database directly in server functions, not through stores
+
+## Git & Commits
+
+### Commit Messages
+- Use descriptive commit messages
+- Group related changes in single commits
+- Follow existing commit message style
+
+## Testing Considerations
+
+### Code Completeness
+- Leave NO todos or placeholders
+- Fully implement all requested functionality
+- Include all required imports
+- Ensure proper error handling
+
+## UI/UX Patterns
+
+### Responsive Design
+- Mobile-first approach
+- Test on different screen sizes
+- Use appropriate breakpoints (sm, md, lg)
+
+### User Feedback
+- Show loading states
+- Display error messages clearly
+- Provide visual feedback for user actions
+
+## Specific Project Patterns
+
+### Authentication
+- Check auth state using `useUserProfile` hook
+- Redirect unauthenticated users appropriately
+- Cache authentication state when possible
+
+### Forms & Inputs
+- Use **single reusable `DynamicInput` component** for all form inputs
+- The `DynamicInput` component should accept props for: type, label, validation rules, error messages, etc.
+- Integrate `DynamicInput` with React Hook Form using `register()` and error handling
+- Different field types (text, email, number, select, textarea) should be handled through props
+- Place reusable input component in `components/shared/DynamicInput.tsx`
+
+### First Call Workflow
+- Use `useFirstCallStore` for state management (UI state only)
+- Follow the timeline pattern for multi-step workflows
+- Auto-advance stages when appropriate
+
+### Dashboard Layout
+- Use persistent sidebar and header across dashboard pages
+- Keep navigation consistent
+- Maintain sticky headers for better UX
+
+### Data Fetching Architecture
+- **Next.js** handles the frontend (Server/Client Components, routing, UI)
+- **Nest.js** handles complex API calls, business logic, and stronger backend operations
+- Server Components in Next.js fetch data via `serverFunctions.ts` or Nest.js API endpoints
+- Never fetch data in Client Components from database - always receive as props from Server Components
+

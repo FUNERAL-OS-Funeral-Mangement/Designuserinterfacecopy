@@ -1,10 +1,10 @@
-.env:
-
 # ===================================================
 # GITIGNORE - DO NOT COMMIT SENSITIVE FILES
 # ===================================================
 
-# Environment Variables - NEVER COMMIT THESE!
+# Environment Variables
+# .env = TEMPLATE with placeholders (COMMIT THIS ✓)
+# .env.local = REAL SECRETS (NEVER COMMIT ✗)
 .env
 .env.local
 .env.development.local
@@ -24,6 +24,10 @@ build
 dist
 dist-ssr
 *.local
+
+# Next.js
+.next/
+out/
 
 # Editor directories and files
 .vscode/*
