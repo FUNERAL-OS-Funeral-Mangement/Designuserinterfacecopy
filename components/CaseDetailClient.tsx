@@ -1,43 +1,40 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCaseStore } from '@/store/useCaseStore';
 import { CaseDetailPage } from './CaseDetailPage';
-import { useEffect, useState } from 'react';
 
-export function CaseDetailClient({ caseId }: { caseId: string }) {
+export interface CaseDetailClientProps {
+  caseId: string;
+  caseNumber: string;
+  deceasedName: string;
+  caseType: 'At-Need' | 'Pre-Need';
+  dateCreated: string;
+  photoUrl?: string;
+}
+
+/**
+ * Client component for case details
+ * Receives data as props from Server Component (page.tsx)
+ * Data is fetched from database in serverFunctions.ts, not from Zustand store
+ */
+export function CaseDetailClient({
+  caseId,
+  caseNumber,
+  deceasedName,
+  caseType,
+  dateCreated,
+  photoUrl,
+}: CaseDetailClientProps) {
   const router = useRouter();
-  const getCaseById = useCaseStore((state) => state.getCaseById);
-  const [caseData, setCaseData] = useState<any>(null);
-
-  useEffect(() => {
-    const data = getCaseById(caseId);
-    if (!data) {
-      router.push('/cases');
-      return;
-    }
-    setCaseData(data);
-  }, [caseId, getCaseById, router]);
-
-  if (!caseData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading case details...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <CaseDetailPage
-      caseId={caseData.caseId}
-      caseNumber={caseData.caseNumber}
-      deceasedName={caseData.deceasedName}
-      caseType={caseData.caseType}
-      dateCreated={caseData.dateCreated}
-      photoUrl={caseData.photoUrl}
+      caseId={caseId}
+      caseNumber={caseNumber}
+      deceasedName={deceasedName}
+      caseType={caseType}
+      dateCreated={dateCreated}
+      photoUrl={photoUrl}
       onBack={() => router.push('/cases')}
     />
   );
